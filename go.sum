@@ -2,6 +2,8 @@ github.com/bugsnag/bugsnag-go v1.5.1/go.mod h1:2oa8nejYd4cQ/b0hMIopN0lCRxU0bueqR
 github.com/bugsnag/panicwrap v1.2.0/go.mod h1:D/8v3kj0zr8ZAKg1AQ6crr+5VwKN5eIywRkfhyM/+dE=
 github.com/code-ready/machine v0.0.0-20190731093717-b6d974ad44d0 h1:036aGx7BK4a7FtdBUprV64az1cY2cQC4PrhMU63Wzxs=
 github.com/code-ready/machine v0.0.0-20190731093717-b6d974ad44d0/go.mod h1:2Kr23hBx5xUHetynE+4hFBwn7Xkx5qoF0SY1FzmLz74=
+github.com/code-ready/machine v0.0.0-20190821063716-34d5b6049a38 h1:aWtngqG5thaPezD/qobOkxrhOx0+fe9FgRBFlcsweyw=
+github.com/code-ready/machine v0.0.0-20190821063716-34d5b6049a38/go.mod h1:2Kr23hBx5xUHetynE+4hFBwn7Xkx5qoF0SY1FzmLz74=
 github.com/code-ready/machine v0.7.1-0.20190501073902-87391ca2ceed h1:ofkhUp+w8H0H0yg31HeHAUrTILg/LsXSKYUXejyhqaw=
 github.com/code-ready/machine v0.7.1-0.20190501073902-87391ca2ceed/go.mod h1:2Kr23hBx5xUHetynE+4hFBwn7Xkx5qoF0SY1FzmLz74=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

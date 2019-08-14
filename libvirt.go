@@ -29,9 +29,6 @@ type Driver struct {
 	// SSH key Path
 	SSHKeyPath string
 
-	// CRC System bundle
-	BundlePath string
-
 	// Driver specific configuration
 	Memory      int
 	CPU         int
@@ -141,7 +138,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.DiskPath = d.ResolveStorePath(fmt.Sprintf("%s.img", d.MachineName))
 
 	// CRC system bundle
-	d.BundlePath = flags.String("libvirt-bundlepath")
+	d.BundleName = flags.String("libvirt-bundlepath")
 	return nil
 }
 
