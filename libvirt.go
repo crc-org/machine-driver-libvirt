@@ -1,11 +1,13 @@
 package libvirt
 
 import (
+	"archive/tar"
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -20,23 +22,23 @@ import (
 	"github.com/code-ready/machine/libmachine/log"
 	"github.com/code-ready/machine/libmachine/mcnflag"
 	"github.com/code-ready/machine/libmachine/mcnutils"
+	"github.com/code-ready/machine/libmachine/ssh"
 	"github.com/code-ready/machine/libmachine/state"
 )
 
 type Driver struct {
 	*drivers.BaseDriver
 
-	// SSH key Path
-	SSHKeyPath string
-
 	// Driver specific configuration
-	Memory      int
-	CPU         int
-	Network     string
-	DiskPath    string
-	DiskPathURL string
-	CacheMode   string
-	IOMode      string
+	Memory       int
+	CPU          int
+	DataDiskSize int
+	Network      string
+	DiskPath     string
+	DataDiskPath string
+	DiskPathURL  string
+	CacheMode    string
+	IOMode       string
 
 	// Libvirt connection and state
 	connectionString string
@@ -82,13 +84,14 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 }
 
 type DomainConfig struct {
-	DomainName string
-	Memory     int
-	CPU        int
-	CacheMode  string
-	IOMode     string
-	DiskPath   string
-	Network    string
+	DomainName   string
+	Memory       int
+	CPU          int
+	CacheMode    string
+	IOMode       string
+	DiskPath     string
+	Network      string
+	DataDiskPath string
 }
 
 func (d *Driver) GetMachineName() string {
@@ -100,7 +103,7 @@ func (d *Driver) GetSSHHostname() (string, error) {
 }
 
 func (d *Driver) GetSSHKeyPath() string {
-	return d.SSHKeyPath
+	return d.ResolveStorePath("id_rsa")
 }
 
 func (d *Driver) GetSSHPort() (int, error) {
@@ -244,6 +247,11 @@ func (d *Driver) Create() error {
 		return err
 	}
 
+	log.Infof("Creating SSH key...")
+	if err := ssh.GenerateSSHKey(d.GetSSHKeyPath()); err != nil {
+		return err
+	}
+
 	// Libvirt typically runs as a deprivileged service account and
 	// needs the execute bit set for directories that contain disks
 	for dir := d.ResolveStorePath("."); dir != "/"; dir = filepath.Dir(dir) {
@@ -260,6 +268,11 @@ func (d *Driver) Create() error {
 		}
 	}
 
+	log.Debugf("Creating VM data disk...")
+	if err := d.generateDiskImage(DefaultDataDiskSize); err != nil {
+		return err
+	}
+
 	log.Debugf("Defining VM...")
 	tmpl, err := template.New("domain").Parse(DomainTemplate)
 	if err != nil {
@@ -267,13 +280,14 @@ func (d *Driver) Create() error {
 	}
 
 	config := DomainConfig{
-		DomainName: d.MachineName,
-		Memory:     d.Memory,
-		CPU:        d.CPU,
-		CacheMode:  d.CacheMode,
-		IOMode:     d.IOMode,
-		DiskPath:   d.DiskPath,
-		Network:    d.Network,
+		DomainName:   d.MachineName,
+		Memory:       d.Memory,
+		CPU:          d.CPU,
+		CacheMode:    d.CacheMode,
+		IOMode:       d.IOMode,
+		DiskPath:     d.DiskPath,
+		Network:      d.Network,
+		DataDiskPath: d.DataDiskPath,
 	}
 
 	var xml bytes.Buffer
@@ -557,6 +571,70 @@ func (d *Driver) GetIP() (string, error) {
 	}
 
 	return d.getIPByMacFromSettings(mac)
+}
+
+func (d *Driver) publicSSHKeyPath() string {
+	return d.GetSSHKeyPath() + ".pub"
+}
+
+// Make a CRC data VM disk image which only contains ssh key
+func (d *Driver) generateDiskImage(size int) error {
+	log.Debugf("Creating %d MB hard disk image...", size)
+
+	magicString := "crc user data"
+
+	buf := new(bytes.Buffer)
+	tw := tar.NewWriter(buf)
+
+	// magicString first so the automount script knows to get user data from the disk
+	file := &tar.Header{Name: magicString, Size: int64(len(magicString))}
+	if err := tw.WriteHeader(file); err != nil {
+		return err
+	}
+	if _, err := tw.Write([]byte(magicString)); err != nil {
+		return err
+	}
+	// .ssh/key.pub => authorized_keys
+	file = &tar.Header{Name: ".ssh", Typeflag: tar.TypeDir, Mode: 0700}
+	if err := tw.WriteHeader(file); err != nil {
+		return err
+	}
+	pubKey, err := ioutil.ReadFile(d.publicSSHKeyPath())
+	if err != nil {
+		return err
+	}
+	file = &tar.Header{Name: ".ssh/authorized_keys", Size: int64(len(pubKey)), Mode: 0644}
+	if err := tw.WriteHeader(file); err != nil {
+		return err
+	}
+	if _, err := tw.Write([]byte(pubKey)); err != nil {
+		return err
+	}
+	if err := tw.Close(); err != nil {
+		return err
+	}
+	raw := bytes.NewReader(buf.Bytes())
+	return createDiskImage(d.DataDiskPath, size, raw)
+}
+
+// createDiskImage makes a disk image at dest with the given size in MB. If r is
+// not nil, it will be read as a raw disk image to convert from.
+func createDiskImage(dest string, size int, r io.Reader) error {
+	// Convert a raw image from stdin to the dest VMDK image.
+	sizeBytes := int64(size) << 20 // usually won't fit in 32-bit int (max 2GB)
+	f, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(f, r)
+	if err != nil {
+		return err
+	}
+	// Rely on seeking to create a sparse raw file for qemu
+	f.Seek(sizeBytes-1, 0)
+	f.Write([]byte{0})
+	return f.Close()
 }
 
 func NewDriver(hostName, storePath string) drivers.Driver {

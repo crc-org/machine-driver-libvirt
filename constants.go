@@ -4,17 +4,18 @@ const (
 	DriverName    = "libvirt"
 	DriverVersion = "0.12.5"
 
-	connectionString = "qemu:///system"
-	dnsmasqLeases    = "/var/lib/libvirt/dnsmasq/%s.leases"
-	dnsmasqStatus    = "/var/lib/libvirt/dnsmasq/%s.status"
-	DefaultMemory    = 8096
-	DefaultCPUs      = 4
-	DefaultNetwork   = "crc"
-	DefaultCacheMode = "default"
-	DefaultIOMode    = "threads"
-	DefaultSSHUser   = "core"
-	DefaultSSHPort   = 22
-	DomainTemplate   = `<domain type='kvm'>
+	connectionString    = "qemu:///system"
+	dnsmasqLeases       = "/var/lib/libvirt/dnsmasq/%s.leases"
+	dnsmasqStatus       = "/var/lib/libvirt/dnsmasq/%s.status"
+	DefaultMemory       = 8096
+	DefaultCPUs         = 4
+	DefaultNetwork      = "crc"
+	DefaultCacheMode    = "default"
+	DefaultIOMode       = "threads"
+	DefaultSSHUser      = "core"
+	DefaultSSHPort      = 22
+	DefaultDataDiskSize = 10
+	DomainTemplate      = `<domain type='kvm'>
   <name>{{ .DomainName }}</name>
   <memory unit='MB'>{{ .Memory }}</memory>
   <vcpu placement='static'>{{ .CPU }}</vcpu>
@@ -40,6 +41,11 @@ const (
       <source file='{{ .DiskPath }}'/>
       <target dev='vda' bus='virtio'/>
     </disk>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='raw' cache='{{.CacheMode}}' io='{{.IOMode}}' />
+      <source file='{{ .DataDiskPath }}'/>
+      <target dev='hdc' bus='ide'/>
+    </disk>
     <graphics type='vnc' autoport='yes' listen='127.0.0.1'>
       <listen type='address' address='127.0.0.1'/>
     </graphics>
@@ -58,4 +64,3 @@ const (
   </devices>
 </domain>`
 )
-
