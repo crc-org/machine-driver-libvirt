@@ -437,6 +437,7 @@ func (d *Driver) validateVMRef() error {
 		vm, err := conn.LookupDomainByName(d.MachineName)
 		if err != nil {
 			log.Warnf("Failed to fetch machine")
+			return fmt.Errorf("Failed to fetch machine '%s'", d.MachineName)
 		} else {
 			d.VM = vm
 			d.vmLoaded = true
