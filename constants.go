@@ -4,7 +4,9 @@ const (
 	DriverName    = "libvirt"
 	DriverVersion = "0.12.7"
 
-	connectionString = "qemu:///system"
+	sessionConnectionString = "qemu:///session"
+	systemConnectionString  = "qemu:///system"
+
 	dnsmasqLeases    = "/var/lib/libvirt/dnsmasq/%s.leases"
 	dnsmasqStatus    = "/var/lib/libvirt/dnsmasq/%s.status"
 	DefaultMemory    = 8096
@@ -45,9 +47,9 @@ const (
     <graphics type='vnc' autoport='yes' listen='127.0.0.1'>
       <listen type='address' address='127.0.0.1'/>
     </graphics>
-    <interface type='network'>
+    <interface type='bridge'>
       <mac address='52:fd:fc:07:21:82'/>
-      <source network='{{.Network}}'/>
+      <source bridge='{{ .BridgeName }}'/>
       <model type='virtio'/>
     </interface>
     <console type='pty'></console>
@@ -60,4 +62,3 @@ const (
   </devices>
 </domain>`
 )
-

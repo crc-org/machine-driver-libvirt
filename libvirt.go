@@ -40,7 +40,8 @@ type Driver struct {
 
 	// Libvirt connection and state
 	connectionString string
-	conn             *libvirt.Connect
+	sessionConn      *libvirt.Connect
+	systemConn       *libvirt.Connect
 	VM               *libvirt.Domain
 	vmLoaded         bool
 }
@@ -88,7 +89,7 @@ type DomainConfig struct {
 	CacheMode  string
 	IOMode     string
 	DiskPath   string
-	Network    string
+	BridgeName string
 }
 
 func (d *Driver) GetMachineName() string {
@@ -146,22 +147,36 @@ func (d *Driver) GetURL() (string, error) {
 	return "", nil
 }
 
-func (d *Driver) getConn() (*libvirt.Connect, error) {
-	if d.conn == nil {
-		conn, err := libvirt.NewConnect(connectionString)
+func (d *Driver) getSessionConn() (*libvirt.Connect, error) {
+	log.Debugf("Connecting to session")
+	if d.sessionConn == nil {
+		conn, err := libvirt.NewConnect(sessionConnectionString)
+		if err != nil {
+			log.Errorf("Failed to connect to libvirt: %s", err)
+			return &libvirt.Connect{}, errors.New("Unable to connect to kvm driver")
+		}
+		d.sessionConn = conn
+	}
+	return d.sessionConn, nil
+}
+
+func (d *Driver) getSystemConn() (*libvirt.Connect, error) {
+	log.Debugf("Connecting to system")
+	if d.systemConn == nil {
+		conn, err := libvirt.NewConnectReadOnly(systemConnectionString)
 		if err != nil {
 			log.Errorf("Failed to connect to libvirt: %s", err)
 			return &libvirt.Connect{}, errors.New("Unable to connect to kvm driver, did you add yourself to the libvirtd group?")
 		}
-		d.conn = conn
+		d.systemConn = conn
 	}
-	return d.conn, nil
+	return d.systemConn, nil
 }
 
 // Create, or verify the private network is properly configured
 func (d *Driver) validateNetwork() error {
 	log.Debug("Validating network")
-	conn, err := d.getConn()
+	conn, err := d.getSystemConn()
 	if err != nil {
 		return err
 	}
@@ -198,20 +213,16 @@ func (d *Driver) validateNetwork() error {
 	if nw.Ip.Address == "" {
 		return fmt.Errorf("%s network doesn't have DHCP configured", d.Network)
 	}
-	// Corner case, but might happen...
-	if active, err := network.IsActive(); !active {
-		log.Debugf("Reactivating network: %s", err)
-		err = network.Create()
-		if err != nil {
-			log.Warnf("Failed to Start network: %s", err)
-			return err
-		}
+	// Since `crc` will ensure network is active as part of it's preflight, this is very unlikely to happen but let's
+	// give a helpful error if that happens.
+	if active, _ := network.IsActive(); !active {
+		return fmt.Errorf("Network '%s' inactive. Use 'crc setup' to activate the network", d.Network)
 	}
 	return nil
 }
 
 func (d *Driver) PreCreateCheck() error {
-	conn, err := d.getConn()
+	conn, err := d.getSessionConn()
 	if err != nil {
 		return err
 	}
@@ -266,6 +277,11 @@ func (d *Driver) Create() error {
 		return err
 	}
 
+	bridgeName, err := d.getBridgeName()
+	if err != nil {
+		return err
+	}
+
 	config := DomainConfig{
 		DomainName: d.MachineName,
 		Memory:     d.Memory,
@@ -273,7 +289,7 @@ func (d *Driver) Create() error {
 		CacheMode:  d.CacheMode,
 		IOMode:     d.IOMode,
 		DiskPath:   d.DiskPath,
-		Network:    d.Network,
+		BridgeName: bridgeName,
 	}
 
 	var xml bytes.Buffer
@@ -282,7 +298,7 @@ func (d *Driver) Create() error {
 		return err
 	}
 
-	conn, err := d.getConn()
+	conn, err := d.getSessionConn()
 	if err != nil {
 		return err
 	}
@@ -430,7 +446,7 @@ func (d *Driver) GetState() (state.State, error) {
 func (d *Driver) validateVMRef() error {
 	if !d.vmLoaded {
 		log.Debugf("Fetching VM...")
-		conn, err := d.getConn()
+		conn, err := d.getSessionConn()
 		if err != nil {
 			return err
 		}
@@ -461,7 +477,7 @@ func (d *Driver) getMAC() (string, error) {
 	    ...
 	    <devices>
 	        ...
-	        <interface type='network'>
+	        <interface type='bridge'>
 	            ...
 	            <mac address='52:54:00:d2:3f:ba'/>
 	            ...
@@ -472,7 +488,7 @@ func (d *Driver) getMAC() (string, error) {
 		Address string `xml:"address,attr"`
 	}
 	type Source struct {
-		Network string `xml:"network,attr"`
+		BridgeName string `xml:"bridge,attr"`
 	}
 	type Interface struct {
 		Type   string `xml:"type,attr"`
@@ -495,8 +511,8 @@ func (d *Driver) getMAC() (string, error) {
 	return dom.Devices.Interfaces[0].Mac.Address, nil
 }
 
-func (d *Driver) getIPByMacFromSettings(mac string) (string, error) {
-	conn, err := d.getConn()
+func (d *Driver) getBridgeName() (string, error) {
+	conn, err := d.getSystemConn()
 	if err != nil {
 		return "", err
 	}
@@ -505,12 +521,22 @@ func (d *Driver) getIPByMacFromSettings(mac string) (string, error) {
 		log.Warnf("Failed to find network: %s", err)
 		return "", err
 	}
-	bridge_name, err := network.GetBridgeName()
+	bridgeName, err := network.GetBridgeName()
 	if err != nil {
 		log.Warnf("Failed to get network bridge: %s", err)
 		return "", err
 	}
-	statusFile := fmt.Sprintf(dnsmasqStatus, bridge_name)
+
+	return bridgeName, nil
+}
+
+func (d *Driver) getIPByMacFromSettings(mac string) (string, error) {
+	bridgeName, err := d.getBridgeName()
+	if err != nil {
+		log.Warnf("Failed to get network bridge: %s", err)
+		return "", err
+	}
+	statusFile := fmt.Sprintf(dnsmasqStatus, bridgeName)
 	data, err := ioutil.ReadFile(statusFile)
 	type Lease struct {
 		Ip_address  string `json:"ip-address"`
