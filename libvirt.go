@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -235,9 +237,9 @@ func (d *Driver) PreCreateCheck() error {
 }
 
 func (d *Driver) Create() error {
-	b2dutils := mcnutils.NewB2dUtils(d.StorePath, "crc")
-	if err := b2dutils.CopyDiskToMachineDir(d.DiskPathURL, d.MachineName); err != nil {
-		return err
+	err := d.createDisk()
+	if err != nil {
+		return fmt.Errorf("Error creating disk image: %s", err)
 	}
 
 	if err := os.MkdirAll(d.ResolveStorePath("."), 0755); err != nil {
@@ -298,6 +300,46 @@ func (d *Driver) Create() error {
 	os.OpenFile(filepath.Join(d.ResolveStorePath("."), fmt.Sprintf(".%s-exist", d.MachineName)), os.O_RDONLY|os.O_CREATE, 0666)
 
 	return d.Start()
+}
+
+func (d *Driver) createDisk() error {
+	u, err := url.Parse(d.DiskPathURL)
+	if err != nil {
+		return fmt.Errorf("Invalid URL: %s", d.DiskPathURL)
+	}
+
+	if u.Scheme == "file" || u.Scheme == "" {
+		// For local image on Linux, we can avoid copying by making use of base image through qemu-img
+		// Local disk image so we can avoid copying by making use of backing image feature of qcow2
+		diskPath := u.Path
+		machineIsoPath := filepath.Join(d.StorePath, "machines", d.MachineName, "crc")
+
+		log.Infof("Create disk image at %s (backing store: %s)", machineIsoPath, diskPath)
+		command := exec.Command("qemu-img", "create", "-b", diskPath, "-f", "qcow2", machineIsoPath)
+		output, err := command.CombinedOutput()
+		log.Debugf("Output of `%s` command:\n%s", commandAsString(command), output)
+		if err == nil {
+			return nil
+		}
+		log.Warnf("Error occurred running `%s` command: %s", commandAsString(command), err)
+	}
+
+	b2dutils := mcnutils.NewB2dUtils(d.StorePath, "crc")
+
+	return b2dutils.CopyDiskToMachineDir(d.DiskPathURL, d.MachineName)
+}
+
+// Backport of exec.Cmd.String() for version < 1.13
+func commandAsString(c *exec.Cmd) string {
+	b := new(strings.Builder)
+	b.WriteString(c.Path)
+
+	for _, a := range c.Args[1:] {
+		b.WriteByte(' ')
+		b.WriteString(a)
+	}
+
+	return b.String()
 }
 
 func (d *Driver) Start() error {
