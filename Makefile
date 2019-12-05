@@ -6,6 +6,9 @@ TARGETS=$(addprefix $(CMD)-, centos8 ubuntu20.04)
 
 build: $(TARGETS)
 
+local:
+	go build -i -v -o crc-driver-libvirt-local ./cmd/machine-driver-libvirt
+
 $(CMD)-%: Dockerfile.%
 	docker rmi -f $@ >/dev/null  2>&1 || true
 	docker rm -f $@-extract > /dev/null 2>&1 || true
