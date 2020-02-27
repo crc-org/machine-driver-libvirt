@@ -19,7 +19,9 @@ const (
   <memory unit='MB'>{{ .Memory }}</memory>
   <vcpu placement='static'>{{ .CPU }}</vcpu>
   <features><acpi/><apic/><pae/></features>
-  <cpu mode='host-passthrough'></cpu>
+  <cpu mode='host-passthrough'>
+    <feature policy="disable" name="rdrand"/>
+  </cpu>
   <os>
     <type arch='x86_64'>hvm</type>
     <boot dev='hd'/>
