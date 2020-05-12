@@ -55,7 +55,7 @@ const (
       <target type='virtio' name='org.qemu.guest_agent.0'/>
     </channel>
     <rng model='virtio'>
-      <backend model='random'>/dev/random</backend>
+      <backend model='random'>/dev/urandom</backend>
     </rng>
   </devices>
 </domain>`
