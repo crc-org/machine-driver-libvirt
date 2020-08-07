@@ -16,6 +16,7 @@ import (
 	"github.com/libvirt/libvirt-go"
 
 	// Machine-drivers
+	libvirtdriver "github.com/code-ready/machine/drivers/libvirt"
 	"github.com/code-ready/machine/libmachine/drivers"
 	"github.com/code-ready/machine/libmachine/log"
 	"github.com/code-ready/machine/libmachine/mcnflag"
@@ -24,19 +25,7 @@ import (
 )
 
 type Driver struct {
-	*drivers.BaseDriver
-
-	// SSH key Path
-	SSHKeyPath string
-
-	// Driver specific configuration
-	Memory      int
-	CPU         int
-	Network     string
-	DiskPath    string
-	DiskPathURL string
-	CacheMode   string
-	IOMode      string
+	*libvirtdriver.Driver
 
 	// Libvirt connection and state
 	connectionString string
@@ -562,11 +551,15 @@ func (d *Driver) GetIP() (string, error) {
 
 func NewDriver(hostName, storePath string) drivers.Driver {
 	return &Driver{
-		Network: DefaultNetwork,
-		BaseDriver: &drivers.BaseDriver{
-			MachineName: hostName,
-			StorePath:   storePath,
-			SSHUser:     DefaultSSHUser,
+		Driver: &libvirtdriver.Driver{
+			VMDriver: &drivers.VMDriver{
+				BaseDriver: &drivers.BaseDriver{
+					MachineName: hostName,
+					StorePath:   storePath,
+					SSHUser:     DefaultSSHUser,
+				},
+			},
+			Network: DefaultNetwork,
 		},
 	}
 }
