@@ -15,14 +15,14 @@ func TestTemplating(t *testing.T) {
 				BaseDriver: &drivers.BaseDriver{
 					MachineName: "domain",
 				},
-				DiskPathURL: "disk_path",
-				Memory:      4096,
-				CPU:         4,
+				ImageSourcePath: "disk_path",
+				ImageFormat:     "test",
+				Memory:          4096,
+				CPU:             4,
 			},
 			Network:   "network",
 			CacheMode: "default",
 			IOMode:    "threads",
-			DiskPath:  "disk_path",
 			VSock:     false,
 		},
 	})
@@ -53,7 +53,7 @@ func TestTemplating(t *testing.T) {
   <devices>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2' cache='default' io='threads' />
-      <source file='disk_path'/>
+      <source file='machines/domain/domain.test'/>
       <target dev='vda' bus='virtio'/>
     </disk>
     <graphics type='vnc' autoport='yes' listen='127.0.0.1'>
@@ -82,14 +82,14 @@ func TestVSockTemplating(t *testing.T) {
 				BaseDriver: &drivers.BaseDriver{
 					MachineName: "domain",
 				},
-				DiskPathURL: "disk_path",
-				Memory:      4096,
-				CPU:         4,
+				ImageSourcePath: "disk_path",
+				ImageFormat:     "test",
+				Memory:          4096,
+				CPU:             4,
 			},
 			Network:   "crc",
 			CacheMode: "default",
 			IOMode:    "threads",
-			DiskPath:  "disk_path",
 			VSock:     true,
 		},
 	})
@@ -104,14 +104,14 @@ func TestNetworkTemplating(t *testing.T) {
 				BaseDriver: &drivers.BaseDriver{
 					MachineName: "domain",
 				},
-				DiskPathURL: "disk_path",
-				Memory:      4096,
-				CPU:         4,
+				ImageSourcePath: "disk_path",
+				ImageFormat:     "test",
+				Memory:          4096,
+				CPU:             4,
 			},
 			Network:   "crc",
 			CacheMode: "default",
 			IOMode:    "threads",
-			DiskPath:  "disk_path",
 			VSock:     true,
 		},
 	})
