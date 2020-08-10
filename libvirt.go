@@ -25,8 +25,6 @@ import (
 	"github.com/code-ready/machine/libmachine/state"
 )
 
-const filePrefix = "file://"
-
 type Driver struct {
 	*libvirtdriver.Driver
 
@@ -126,7 +124,6 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.CacheMode = flags.String("libvirt-cachemode")
 	d.IOMode = flags.String("libvirt-iomode")
 	d.SSHPort = 22
-	d.DiskPath = d.ResolveStorePath(fmt.Sprintf("%s.img", d.MachineName))
 
 	// CRC system bundle
 	d.BundleName = flags.String("libvirt-bundlepath")
@@ -230,12 +227,15 @@ func (d *Driver) PreCreateCheck() error {
 	return nil
 }
 
-func (d *Driver) Create() error {
-	if !strings.HasPrefix(d.DiskPathURL, filePrefix) {
-		return fmt.Errorf("DiskPathURL must start with %s", filePrefix)
-	}
+func (d *Driver) getDiskPath() string {
+	return d.ResolveStorePath(fmt.Sprintf("%s.%s", d.MachineName, d.ImageFormat))
+}
 
-	if err := createImage(strings.ReplaceAll(d.DiskPathURL, filePrefix, ""), d.DiskPath); err != nil {
+func (d *Driver) Create() error {
+	if d.ImageFormat != "qcow2" {
+		return fmt.Errorf("Unsupported VM image format: %s", d.ImageFormat)
+	}
+	if err := createImage(d.ImageSourcePath, d.getDiskPath()); err != nil {
 		return err
 	}
 
@@ -297,7 +297,7 @@ func domainXML(d *Driver) (string, error) {
 		CPU:        d.CPU,
 		CacheMode:  d.CacheMode,
 		IOMode:     d.IOMode,
-		DiskPath:   d.DiskPath,
+		DiskPath:   d.getDiskPath(),
 	}
 	if d.Network != "" {
 		config.ExtraDevices = append(config.ExtraDevices, NetworkDevice(d.Network))

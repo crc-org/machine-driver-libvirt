@@ -8,6 +8,10 @@ github.com/code-ready/machine v0.0.0-20200810103403-d2277fb226c4 h1:7rvtC0pR4q6U
 github.com/code-ready/machine v0.0.0-20200810103403-d2277fb226c4/go.mod h1:g30jKsf0FV9yJjsqZFAuFzVxwJE2h5cqDXSuMUV1G/U=
 github.com/code-ready/machine v0.0.0-20200903081832-ffa0b31fbdb3 h1:p6QhNf5a/ThRdPydIXyBmwVutNyRxY3yQgXvjeGf8nM=
 github.com/code-ready/machine v0.0.0-20200903081832-ffa0b31fbdb3/go.mod h1:g30jKsf0FV9yJjsqZFAuFzVxwJE2h5cqDXSuMUV1G/U=
+github.com/code-ready/machine v0.0.0-20200914130222-4c6e6576e87a h1:SI+ojl7up54ziVmsRvT+48JbM9BuxFOz+Eq6ln1Kfcs=
+github.com/code-ready/machine v0.0.0-20200914130222-4c6e6576e87a/go.mod h1:g30jKsf0FV9yJjsqZFAuFzVxwJE2h5cqDXSuMUV1G/U=
+github.com/code-ready/machine v0.0.0-20200914130222-8fb9497666ab h1:56RlouIod7gpu4OayF0/qkGUdes7mH7DIshHnchA7Ds=
+github.com/code-ready/machine v0.0.0-20200914130222-8fb9497666ab/go.mod h1:g30jKsf0FV9yJjsqZFAuFzVxwJE2h5cqDXSuMUV1G/U=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
