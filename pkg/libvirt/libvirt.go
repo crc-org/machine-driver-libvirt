@@ -298,23 +298,35 @@ func (d *Driver) PreCreateCheck() error {
 	if err != nil {
 		return err
 	}
+
+	err = d.validateStoragePool()
+	if err != nil {
+		return err
+	}
 	// Others...?
 	return nil
 }
 
-func (d *Driver) getDiskPath() string {
+func (d *Driver) getDiskImagePath() string {
 	return d.ResolveStorePath(fmt.Sprintf("%s.%s", d.MachineName, d.ImageFormat))
 }
 
-func (d *Driver) Create() error {
+func (d *Driver) setupDiskImage() error {
+	diskPath := d.getDiskImagePath()
+
+	log.Debugf("Preparing %s for machine use", diskPath)
 	if d.ImageFormat != "qcow2" {
 		return fmt.Errorf("Unsupported VM image format: %s", d.ImageFormat)
 	}
-	if err := createImage(d.ImageSourcePath, d.getDiskPath()); err != nil {
+
+	if err := createImage(d.ImageSourcePath, diskPath); err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(d.ResolveStorePath("."), 0755); err != nil {
+	/* If createImage uses libvirt APIs to create the overlay qcow2 file,
+	 * an explicit pool refresh won't be needed
+	 */
+	if err := d.refreshStoragePool(); err != nil {
 		return err
 	}
 
@@ -334,6 +346,15 @@ func (d *Driver) Create() error {
 				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+func (d *Driver) Create() error {
+	err := d.setupDiskImage()
+	if err != nil {
+		return err
 	}
 
 	log.Debugf("Defining VM...")
@@ -372,7 +393,7 @@ func domainXML(d *Driver) (string, error) {
 		CPU:        d.CPU,
 		CacheMode:  d.CacheMode,
 		IOMode:     d.IOMode,
-		DiskPath:   d.getDiskPath(),
+		DiskPath:   d.getDiskImagePath(),
 	}
 	if d.Network != "" {
 		config.ExtraDevices = append(config.ExtraDevices, NetworkDevice(d.Network))
@@ -413,6 +434,10 @@ func (d *Driver) Start() error {
 	if err := d.validateVMRef(); err != nil {
 		return err
 	}
+	if err := d.validateStoragePool(); err != nil {
+		return err
+	}
+
 	if err := d.vm.Create(); err != nil {
 		log.Warnf("Failed to start: %s", err)
 		return err
@@ -686,7 +711,8 @@ func NewDriver(hostName, storePath string) drivers.Driver {
 					SSHUser:     DefaultSSHUser,
 				},
 			},
-			Network: DefaultNetwork,
+			Network:     DefaultNetwork,
+			StoragePool: DefaultPool,
 		},
 	}
 }
