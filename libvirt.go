@@ -163,6 +163,8 @@ func (d *Driver) validateNetwork() error {
 	if err != nil {
 		return fmt.Errorf("Use 'crc setup' to define the network, %+v", err)
 	}
+	defer network.Free() // nolint:errcheck
+
 	xmldoc, err := network.GetXMLDesc(0)
 	if err != nil {
 		return err
@@ -538,6 +540,7 @@ func (d *Driver) getIPByMacFromSettings(mac string) (string, error) {
 		log.Warnf("Failed to find network: %s", err)
 		return "", err
 	}
+	defer network.Free() // nolint:errcheck
 	bridgeName, err := network.GetBridgeName()
 	if err != nil {
 		log.Warnf("Failed to get network bridge: %s", err)
