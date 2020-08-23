@@ -41,10 +41,8 @@ const (
       <driver name='qemu' type='qcow2' cache='{{ .CacheMode }}' io='{{ .IOMode }}' />
       <source file='{{ .DiskPath }}'/>
       <target dev='vda' bus='virtio'/>
+      <boot order='1'/>
     </disk>
-    <graphics type='vnc' autoport='yes' listen='127.0.0.1'>
-      <listen type='address' address='127.0.0.1'/>
-    </graphics>
     <interface type='network'>
       <mac address='52:fd:fc:07:21:82'/>
       <source network='{{.Network}}'/>
@@ -57,6 +55,7 @@ const (
     <rng model='virtio'>
       <backend model='random'>/dev/urandom</backend>
     </rng>
+    <memballoon model='none'/>
     <vsock model='virtio'>
       <cid auto='yes'/>
     </vsock>
