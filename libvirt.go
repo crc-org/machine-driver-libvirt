@@ -130,6 +130,54 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	return nil
 }
 
+func convertMBToKiB(sizeMb int) uint64 {
+	return uint64(sizeMb) * 1000 * 1000 / 1024
+}
+
+func (d *Driver) setMemory(memorySize int) error {
+	log.Debugf("Setting memory to %d MB", memorySize)
+	if err := d.validateVMRef(); err != nil {
+		return err
+	}
+	/* d.Memory is in MB, SetMemoryFlags expects kiB */
+	err := d.vm.SetMemoryFlags(convertMBToKiB(memorySize), libvirt.DOMAIN_MEM_MAXIMUM)
+	if err != nil {
+		return err
+	}
+	err = d.vm.SetMemoryFlags(convertMBToKiB(memorySize), libvirt.DOMAIN_MEM_CONFIG)
+	if err != nil {
+		return err
+	}
+
+	d.Memory = memorySize
+
+	return nil
+}
+
+func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
+	var newDriver libvirtdriver.Driver
+	err := json.Unmarshal(rawConfig, &newDriver)
+	if err != nil {
+		return err
+	}
+	// FIXME: not clear what the upper layers should do in case of partial errors?
+	// is it the drivers implementation responsibility to keep a consistent internal state,
+	// and should it return its (partial) new state when an error occurred?
+	if newDriver.Memory != d.Memory {
+		err := d.setMemory(newDriver.Memory)
+		if err != nil {
+			log.Warnf("Failed to update memory: %v", err)
+			return err
+		}
+	}
+	if newDriver.SSHKeyPath != d.SSHKeyPath {
+		log.Debugf("Updating SSH Key Path", d.SSHKeyPath, newDriver.SSHKeyPath)
+	}
+
+	*d.Driver = newDriver
+	return nil
+}
+
 func (d *Driver) GetURL() (string, error) {
 	return "", nil
 }
