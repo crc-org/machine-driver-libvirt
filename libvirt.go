@@ -32,7 +32,7 @@ type Driver struct {
 
 	// Libvirt connection and state
 	conn     *libvirt.Connect
-	VM       *libvirt.Domain
+	vm       *libvirt.Domain
 	vmLoaded bool
 }
 
@@ -277,7 +277,7 @@ func (d *Driver) Create() error {
 		log.Warnf("Failed to create the VM: %s", err)
 		return err
 	}
-	d.VM = vm
+	d.vm = vm
 	d.vmLoaded = true
 	log.Debugf("Adding the file: %s", filepath.Join(d.ResolveStorePath("."), fmt.Sprintf(".%s-exist", d.MachineName)))
 	_, _ = os.OpenFile(filepath.Join(d.ResolveStorePath("."), fmt.Sprintf(".%s-exist", d.MachineName)), os.O_RDONLY|os.O_CREATE, 0666)
@@ -337,7 +337,7 @@ func (d *Driver) Start() error {
 	if err := d.validateVMRef(); err != nil {
 		return err
 	}
-	if err := d.VM.Create(); err != nil {
+	if err := d.vm.Create(); err != nil {
 		log.Warnf("Failed to start: %s", err)
 		return err
 	}
@@ -386,7 +386,7 @@ func (d *Driver) Stop() error {
 	}
 
 	if s != state.Stopped {
-		err := d.VM.Shutdown()
+		err := d.vm.Shutdown()
 		if err != nil {
 			log.Warnf("Failed to gracefully shutdown VM")
 			return err
@@ -412,8 +412,8 @@ func (d *Driver) Remove() error {
 	// Note: If we switch to qcow disks instead of raw the user
 	//       could take a snapshot.  If you do, then Undefine
 	//       will fail unless we nuke the snapshots first
-	_ = d.VM.Destroy() // Ignore errors
-	return d.VM.Undefine()
+	_ = d.vm.Destroy() // Ignore errors
+	return d.vm.Undefine()
 }
 
 func (d *Driver) Restart() error {
@@ -429,7 +429,7 @@ func (d *Driver) Kill() error {
 	if err := d.validateVMRef(); err != nil {
 		return err
 	}
-	return d.VM.Destroy()
+	return d.vm.Destroy()
 }
 
 func (d *Driver) GetState() (state.State, error) {
@@ -437,7 +437,7 @@ func (d *Driver) GetState() (state.State, error) {
 	if err := d.validateVMRef(); err != nil {
 		return state.None, err
 	}
-	virState, _, err := d.VM.GetState()
+	virState, _, err := d.vm.GetState()
 	if err != nil {
 		return state.None, err
 	}
@@ -475,7 +475,7 @@ func (d *Driver) validateVMRef() error {
 			log.Warnf("Failed to fetch machine")
 			return fmt.Errorf("Failed to fetch machine '%s'", d.MachineName)
 		}
-		d.VM = vm
+		d.vm = vm
 		d.vmLoaded = true
 	}
 	return nil
@@ -487,7 +487,7 @@ func (d *Driver) getMAC() (string, error) {
 	if err := d.validateVMRef(); err != nil {
 		return "", err
 	}
-	xmldoc, err := d.VM.GetXMLDesc(0)
+	xmldoc, err := d.vm.GetXMLDesc(0)
 	if err != nil {
 		return "", err
 	}
