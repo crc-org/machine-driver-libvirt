@@ -161,7 +161,7 @@ func (d *Driver) validateNetwork() error {
 	}
 	network, err := conn.LookupNetworkByName(d.Network)
 	if err != nil {
-		return fmt.Errorf("Use 'crc setup' for define the network, %+v", err)
+		return fmt.Errorf("Use 'crc setup' to define the network, %+v", err)
 	}
 	xmldoc, err := network.GetXMLDesc(0)
 	if err != nil {
