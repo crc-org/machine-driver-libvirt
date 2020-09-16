@@ -154,6 +154,26 @@ func (d *Driver) setMemory(memorySize int) error {
 	return nil
 }
 
+func (d *Driver) setVcpus(cpus uint) error {
+	log.Debugf("Setting vcpus to %d", cpus)
+	if err := d.validateVMRef(); err != nil {
+		return err
+	}
+
+	err := d.vm.SetVcpusFlags(cpus, libvirt.DOMAIN_VCPU_CONFIG|libvirt.DOMAIN_VCPU_MAXIMUM)
+	if err != nil {
+		return err
+	}
+	err = d.vm.SetVcpusFlags(cpus, libvirt.DOMAIN_VCPU_CONFIG)
+	if err != nil {
+		return err
+	}
+
+	d.CPU = int(cpus)
+
+	return nil
+}
+
 func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
 	var newDriver libvirtdriver.Driver
 	err := json.Unmarshal(rawConfig, &newDriver)
@@ -167,6 +187,13 @@ func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
 		err := d.setMemory(newDriver.Memory)
 		if err != nil {
 			log.Warnf("Failed to update memory: %v", err)
+			return err
+		}
+	}
+	if newDriver.CPU != d.CPU {
+		err := d.setVcpus(uint(newDriver.CPU))
+		if err != nil {
+			log.Warnf("Failed to update CPU count: %v", err)
 			return err
 		}
 	}
