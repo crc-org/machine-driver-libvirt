@@ -13,7 +13,7 @@ jobs:
     - checkout
     - run:
        name: Build driver binary
-       command: make
+       command: make CONTAINER_RUNTIME="docker"
     - store_artifacts:
        path: ~/work/crc-driver-libvirt-centos8
        destination: crc-driver-libvirt
