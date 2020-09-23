@@ -15,9 +15,9 @@ jobs:
        name: Build driver binary
        command: make
     - store_artifacts:
-       path: ~/work/crc-driver-libvirt-centos7
+       path: ~/work/crc-driver-libvirt-centos8
        destination: crc-driver-libvirt
     - store_artifacts:
-       path: ~/work/crc-driver-libvirt-ubuntu16.04
-       destination: crc-driver-libvirt-ubuntu16.04
+       path: ~/work/crc-driver-libvirt-ubuntu20.04
+       destination: crc-driver-libvirt-ubuntu20.04
 
