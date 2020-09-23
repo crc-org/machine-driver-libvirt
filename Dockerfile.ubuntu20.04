@@ -2,12 +2,9 @@ FROM ubuntu:20.04
 
 MAINTAINER CodeReady Containers
 
-ARG GO_VERSION
-
 ENV DEBIAN_FRONTEND="noninteractive"
-RUN apt-get update && apt-get install -y libvirt-dev curl git gcc make
-RUN curl -sSL https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz | tar -C /usr/local -xzf -
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/go/bin
+RUN apt-get update && apt-get install -y libvirt-dev curl git gcc make golang
+ENV PATH=/usr/sbin:/usr/bin:/sbin:/bin:/go/bin
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /go/bin v1.30.0
 

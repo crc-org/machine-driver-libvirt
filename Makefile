@@ -1,6 +1,5 @@
 PREFIX=/go
 CMD=crc-driver-libvirt
-GO_VERSION=1.13.4
 DESCRIBE=$(shell git describe --tags)
 
 TARGETS=$(addprefix $(CMD)-, centos8 ubuntu20.04)
@@ -11,7 +10,7 @@ $(CMD)-%: Dockerfile.%
 	docker rmi -f $@ >/dev/null  2>&1 || true
 	docker rm -f $@-extract > /dev/null 2>&1 || true
 	echo "Building binaries for $@"
-	docker build --build-arg "GO_VERSION=$(GO_VERSION)" -t $@ -f $< .
+	docker build -t $@ -f $< .
 	docker create --name $@-extract $@ sh
 	docker cp $@-extract:$(PREFIX)/bin/$(CMD) ./
 	mv ./$(CMD) ./$@
