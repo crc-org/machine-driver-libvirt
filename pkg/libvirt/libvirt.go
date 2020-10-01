@@ -453,6 +453,9 @@ func (d *Driver) Start() error {
 	if err := d.validateVMRef(); err != nil {
 		return err
 	}
+	if err := d.validateNetwork(); err != nil {
+		return err
+	}
 	if err := d.validateStoragePool(); err != nil {
 		return err
 	}
