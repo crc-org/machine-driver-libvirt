@@ -184,6 +184,7 @@ func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
 	// is it the drivers implementation responsibility to keep a consistent internal state,
 	// and should it return its (partial) new state when an error occurred?
 	if newDriver.Memory != d.Memory {
+		log.Debugf("Updating memory size to %d kiB", newDriver.Memory)
 		err := d.setMemory(newDriver.Memory)
 		if err != nil {
 			log.Warnf("Failed to update memory: %v", err)
@@ -191,6 +192,7 @@ func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
 		}
 	}
 	if newDriver.CPU != d.CPU {
+		log.Debugf("Updating vcpu count to %d", newDriver.CPU)
 		err := d.setVcpus(uint(newDriver.CPU))
 		if err != nil {
 			log.Warnf("Failed to update CPU count: %v", err)
