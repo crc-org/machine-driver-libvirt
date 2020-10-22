@@ -110,3 +110,65 @@ func (d *Driver) getPool() (*libvirt.StoragePool, error) {
 
 	return pool, nil
 }
+
+func (d *Driver) getVolume() (*libvirt.StorageVol, error) {
+	pool, err := d.getPool()
+	if err != nil {
+		return nil, err
+	}
+	defer pool.Free() // nolint:errcheck
+
+	vol, err := pool.LookupStorageVolByName(d.getDiskImageFilename())
+	if err != nil {
+		return nil, err
+	}
+
+	return vol, nil
+}
+
+func (d *Driver) getVolCapacity() (uint64, error) {
+	vol, err := d.getVolume()
+	if err != nil {
+		return 0, err
+	}
+	defer vol.Free() // nolint:errcheck
+	volInfo, err := vol.GetInfoFlags(libvirt.STORAGE_VOL_USE_ALLOCATION)
+	if err != nil {
+		return 0, err
+	}
+
+	return volInfo.Capacity, nil
+}
+
+func (d *Driver) resizeDiskImage(newCapacity uint64) error {
+	log.Infof("resizeDiskImage to %d", newCapacity)
+	if newCapacity == 0 {
+		return nil
+	}
+
+	capacity, err := d.getVolCapacity()
+	if err != nil {
+		log.Infof("could not get volume capacity: %v", err)
+		return err
+	}
+	log.Infof("volume capacity is %d", capacity)
+	if capacity == newCapacity {
+		log.Debugf("disk image capacity is already %d bytes", capacity)
+		return nil
+	}
+
+	vol, err := d.getVolume()
+	if err != nil {
+		return err
+	}
+	defer vol.Free() // nolint:errcheck
+
+	log.Infof("resizing volume to %d", newCapacity)
+	err = vol.Resize(newCapacity, 0)
+	if err == nil {
+		d.DiskCapacity = newCapacity
+	}
+	log.Infof("vol.Resize result: %v", err)
+
+	return err
+}

@@ -200,6 +200,19 @@ func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
 	if newDriver.SSHKeyPath != d.SSHKeyPath {
 		log.Debugf("Updating SSH Key Path", d.SSHKeyPath, newDriver.SSHKeyPath)
 	}
+	diskCapacity, err := d.getVolCapacity()
+	if err != nil {
+		return err
+	}
+
+	if newDriver.DiskCapacity != 0 && newDriver.DiskCapacity != diskCapacity {
+		log.Debugf("Updating disk image capacity to %d bytes", newDriver.DiskCapacity)
+		err = d.resizeDiskImage(newDriver.DiskCapacity)
+		if err != nil {
+			log.Warnf("Failed to resize disk image: %v", err)
+			return err
+		}
+	}
 
 	*d.Driver = newDriver
 	return nil
@@ -305,6 +318,10 @@ func (d *Driver) PreCreateCheck() error {
 	}
 	// Others...?
 	return nil
+}
+
+func (d *Driver) getDiskImageFilename() string {
+	return fmt.Sprintf("%s.%s", d.MachineName, d.ImageFormat)
 }
 
 func (d *Driver) getDiskImagePath() string {
@@ -436,6 +453,14 @@ func (d *Driver) Start() error {
 	}
 	if err := d.validateStoragePool(); err != nil {
 		return err
+	}
+
+	if d.DiskCapacity == 0 {
+		diskCapacity, err := d.getVolCapacity()
+		if err != nil {
+			return err
+		}
+		d.DiskCapacity = diskCapacity
 	}
 
 	if err := d.vm.Create(); err != nil {
