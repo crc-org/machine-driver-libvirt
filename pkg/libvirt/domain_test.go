@@ -31,9 +31,9 @@ func TestTemplating(t *testing.T) {
 	assert.Equal(t, `<domain type="kvm">
   <name>domain</name>
   <memory unit="MB">4096</memory>
-  <vcpu placement="static">4</vcpu>
+  <vcpu>4</vcpu>
   <os>
-    <type arch="x86_64">hvm</type>
+    <type>hvm</type>
     <boot dev="hd"></boot>
     <bootmenu enable="no"></bootmenu>
   </os>
@@ -58,9 +58,7 @@ func TestTemplating(t *testing.T) {
       <model type="virtio"></model>
     </interface>
     <console></console>
-    <graphics type="vnc" autoport="yes" listen="127.0.0.1">
-      <listen type="address" address="127.0.0.1"></listen>
-    </graphics>
+    <graphics type="vnc"></graphics>
     <memballoon model="none"></memballoon>
     <rng model="virtio">
       <backend model="random">/dev/urandom</backend>

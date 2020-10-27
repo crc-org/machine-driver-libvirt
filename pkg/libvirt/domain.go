@@ -15,8 +15,7 @@ func domainXML(d *Driver) (string, error) {
 			Unit:  "MB",
 		},
 		VCPU: &libvirtxml.DomainVCPU{
-			Placement: "static",
-			Value:     uint(d.CPU),
+			Value: uint(d.CPU),
 		},
 		Features: &libvirtxml.DomainFeatureList{
 			ACPI: &libvirtxml.DomainFeature{},
@@ -34,7 +33,6 @@ func domainXML(d *Driver) (string, error) {
 		},
 		OS: &libvirtxml.DomainOS{
 			Type: &libvirtxml.DomainOSType{
-				Arch: "x86_64",
 				Type: "hvm",
 			},
 			BootDevices: []libvirtxml.DomainBootDevice{
@@ -72,17 +70,7 @@ func domainXML(d *Driver) (string, error) {
 			},
 			Graphics: []libvirtxml.DomainGraphic{
 				{
-					VNC: &libvirtxml.DomainGraphicVNC{
-						AutoPort: "yes",
-						Listen:   "127.0.0.1",
-						Listeners: []libvirtxml.DomainGraphicListener{
-							{
-								Address: &libvirtxml.DomainGraphicListenerAddress{
-									Address: "127.0.0.1",
-								},
-							},
-						},
-					},
+					VNC: &libvirtxml.DomainGraphicVNC{},
 				},
 			},
 			Consoles: []libvirtxml.DomainConsole{
