@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	DriverName    = "libvirt"
-	DriverVersion = "0.12.10"
+	DriverVersion = "0.12.11"
 
 	connectionString = "qemu:///system"
 	dnsmasqStatus    = "/var/lib/libvirt/dnsmasq/%s.status"
