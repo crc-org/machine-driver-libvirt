@@ -24,6 +24,7 @@ func domainXML(d *Driver) (string, error) {
 		},
 		CPU: &libvirtxml.DomainCPU{
 			Mode: "host-passthrough",
+			// https://bugzilla.redhat.com/show_bug.cgi?id=1806532
 			Features: []libvirtxml.DomainCPUFeature{
 				{
 					Policy: "disable",
