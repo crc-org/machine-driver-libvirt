@@ -61,6 +61,7 @@ func TestTemplating(t *testing.T) {
     <graphics type="vnc" autoport="yes" listen="127.0.0.1">
       <listen type="address" address="127.0.0.1"></listen>
     </graphics>
+    <memballoon model="none"></memballoon>
     <rng model="virtio">
       <backend model="random">/dev/urandom</backend>
     </rng>

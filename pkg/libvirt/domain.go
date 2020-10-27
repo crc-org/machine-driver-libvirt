@@ -98,6 +98,9 @@ func domainXML(d *Driver) (string, error) {
 					},
 				},
 			},
+			MemBalloon: &libvirtxml.DomainMemBalloon{
+				Model: "none",
+			},
 		},
 	}
 	if d.Network != "" {
