@@ -4,6 +4,8 @@ import (
 	libvirtxml "github.com/libvirt/libvirt-go-xml"
 )
 
+const macAddress = "52:fd:fc:07:21:82"
+
 func domainXML(d *Driver) (string, error) {
 	domain := libvirtxml.Domain{
 		Type: "kvm",
@@ -102,7 +104,7 @@ func domainXML(d *Driver) (string, error) {
 		domain.Devices.Interfaces = []libvirtxml.DomainInterface{
 			{
 				MAC: &libvirtxml.DomainInterfaceMAC{
-					Address: "52:fd:fc:07:21:82",
+					Address: macAddress,
 				},
 				Source: &libvirtxml.DomainInterfaceSource{
 					Network: &libvirtxml.DomainInterfaceSourceNetwork{
