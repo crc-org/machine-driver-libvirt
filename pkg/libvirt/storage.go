@@ -140,26 +140,42 @@ func (d *Driver) getVolCapacity() (uint64, error) {
 	return volInfo.Capacity, nil
 }
 
-func (d *Driver) resizeDiskImage(newCapacity uint64) error {
-	log.Infof("resizeDiskImage to %d", newCapacity)
+func (d *Driver) checkIfResizeNeeded(newCapacity uint64) (bool, error) {
 	if newCapacity == 0 {
-		return nil
+		return false, nil
 	}
-
 	capacity, err := d.getVolCapacity()
 	if err != nil {
 		log.Infof("could not get volume capacity: %v", err)
-		return err
+		return false, err
 	}
 	log.Infof("volume capacity is %d", capacity)
 	if capacity == newCapacity {
 		log.Debugf("disk image capacity is already %d bytes", capacity)
-		return nil
+		return false, nil
 	}
 	if capacity > newCapacity {
-		return fmt.Errorf("current disk image capacity is bigger than the requested size (%d > %d)", capacity, newCapacity)
+		return false, fmt.Errorf("current disk image capacity is bigger than the requested size (%d > %d)", capacity, newCapacity)
+	}
+	return true, nil
+}
+
+func (d *Driver) resizeDiskImageIfNeeded(newCapacity uint64) (bool, error) {
+	resizeNeeded, err := d.checkIfResizeNeeded(newCapacity)
+	if err != nil || !resizeNeeded {
+		return false, err
+	}
+	err = d.resizeDiskImage(newCapacity)
+	if err != nil {
+		log.Debugf("failed to resize disk image")
+		return false, err
 	}
 
+	return true, nil
+}
+
+func (d *Driver) resizeDiskImage(newCapacity uint64) error {
+	log.Debugf("resizeDiskImage(%d)", newCapacity)
 	vol, err := d.getVolume()
 	if err != nil {
 		return err
