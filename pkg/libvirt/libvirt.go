@@ -68,16 +68,6 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 	}
 }
 
-type DomainConfig struct {
-	DomainName   string
-	Memory       int
-	CPU          int
-	CacheMode    string
-	IOMode       string
-	DiskPath     string
-	ExtraDevices []string
-}
-
 func (d *Driver) GetMachineName() string {
 	return d.MachineName
 }
