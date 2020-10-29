@@ -156,6 +156,9 @@ func (d *Driver) resizeDiskImage(newCapacity uint64) error {
 		log.Debugf("disk image capacity is already %d bytes", capacity)
 		return nil
 	}
+	if capacity > newCapacity {
+		return fmt.Errorf("current disk image capacity is bigger than the requested size (%d > %d)", capacity, newCapacity)
+	}
 
 	vol, err := d.getVolume()
 	if err != nil {
