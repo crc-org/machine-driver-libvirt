@@ -33,7 +33,7 @@ func TestTemplating(t *testing.T) {
   <memory unit="MB">4096</memory>
   <vcpu>4</vcpu>
   <os>
-    <type>hvm</type>
+    <type machine="q35">hvm</type>
     <boot dev="hd"></boot>
     <bootmenu enable="no"></bootmenu>
   </os>

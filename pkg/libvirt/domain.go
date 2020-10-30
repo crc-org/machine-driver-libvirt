@@ -34,7 +34,8 @@ func domainXML(d *Driver) (string, error) {
 		},
 		OS: &libvirtxml.DomainOS{
 			Type: &libvirtxml.DomainOSType{
-				Type: "hvm",
+				Machine: "q35",
+				Type:    "hvm",
 			},
 			BootDevices: []libvirtxml.DomainBootDevice{
 				{
