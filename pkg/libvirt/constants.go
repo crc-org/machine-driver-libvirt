@@ -2,7 +2,7 @@ package libvirt
 
 const (
 	DriverName    = "libvirt"
-	DriverVersion = "0.12.11"
+	DriverVersion = "0.12.12"
 
 	connectionString = "qemu:///system"
 	DefaultMemory    = 8096
