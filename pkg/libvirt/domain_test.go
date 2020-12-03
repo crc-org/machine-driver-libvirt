@@ -25,7 +25,7 @@ func TestTemplating(t *testing.T) {
 			IOMode:    "threads",
 			VSock:     false,
 		},
-	})
+	}, "q35")
 
 	assert.NoError(t, err)
 	assert.Equal(t, `<domain type="kvm">
@@ -84,9 +84,10 @@ func TestVSockTemplating(t *testing.T) {
 			IOMode:    "threads",
 			VSock:     true,
 		},
-	})
+	}, "")
 	assert.NoError(t, err)
 	assert.Regexp(t, `(?s)<devices>(.*?)<vsock model="virtio">\s*<cid auto="yes">\s*</cid>\s*</vsock>(.*?)</devices>`, xml)
+	assert.Regexp(t, `(?s)<os>(.*?)<type>hvm</type>(.*?)</os>`, xml)
 }
 
 func TestNetworkTemplating(t *testing.T) {
@@ -106,7 +107,7 @@ func TestNetworkTemplating(t *testing.T) {
 			IOMode:    "threads",
 			VSock:     true,
 		},
-	})
+	}, "q35")
 	assert.NoError(t, err)
 	assert.Contains(t, xml, `<interface type="network">
       <mac address="52:fd:fc:07:21:82"></mac>

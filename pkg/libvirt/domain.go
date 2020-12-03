@@ -6,7 +6,7 @@ import (
 
 const macAddress = "52:fd:fc:07:21:82"
 
-func domainXML(d *Driver) (string, error) {
+func domainXML(d *Driver, machineType string) (string, error) {
 	domain := libvirtxml.Domain{
 		Type: "kvm",
 		Name: d.MachineName,
@@ -34,8 +34,7 @@ func domainXML(d *Driver) (string, error) {
 		},
 		OS: &libvirtxml.DomainOS{
 			Type: &libvirtxml.DomainOSType{
-				Machine: "q35",
-				Type:    "hvm",
+				Type: "hvm",
 			},
 			BootDevices: []libvirtxml.DomainBootDevice{
 				{
@@ -92,6 +91,9 @@ func domainXML(d *Driver) (string, error) {
 				Model: "none",
 			},
 		},
+	}
+	if machineType != "" {
+		domain.OS.Type.Machine = machineType
 	}
 	if d.Network != "" {
 		domain.Devices.Interfaces = []libvirtxml.DomainInterface{

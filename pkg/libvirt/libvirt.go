@@ -334,6 +334,40 @@ func (d *Driver) setupDiskImage() error {
 	return nil
 }
 
+func getMachineType(conn *libvirt.Connect) (string, error) {
+	capsXML, err := conn.GetCapabilities()
+	if err != nil {
+		return "", err
+	}
+	caps := &libvirtxml.Caps{}
+	err = caps.Unmarshal(capsXML)
+	if err != nil {
+		return "", fmt.Errorf("Error parsing libvirt capabilities: %w", err)
+	}
+
+	var capsGuestArch *libvirtxml.CapsGuestArch
+	for _, guest := range caps.Guests {
+		if guest.OSType == "hvm" && guest.Arch.Name == caps.Host.CPU.Arch {
+			log.Debugf("Found %s hypervisor with 'hvm' capabilities", caps.Host.CPU.Arch)
+			capsGuestArch = &guest.Arch
+			break
+		}
+	}
+
+	if capsGuestArch == nil {
+		return "", fmt.Errorf("Could not find a %s hypervisor with 'hvm' capabilities", caps.Host.CPU.Arch)
+	}
+	for _, machine := range capsGuestArch.Machines {
+		if machine.Name == "q35" || machine.Canonical == "q35" {
+			log.Debugf("Found q35 machine type")
+			return "q35", nil
+		}
+	}
+
+	log.Debugf("No q35 machine type")
+	return "", nil
+}
+
 func (d *Driver) Create() error {
 	err := d.setupDiskImage()
 	if err != nil {
@@ -341,12 +375,13 @@ func (d *Driver) Create() error {
 	}
 
 	log.Debugf("Defining VM...")
-	xml, err := domainXML(d)
+	conn, err := d.getConn()
 	if err != nil {
 		return err
 	}
+	machineType, _ := getMachineType(conn)
 
-	conn, err := d.getConn()
+	xml, err := domainXML(d, machineType)
 	if err != nil {
 		return err
 	}
