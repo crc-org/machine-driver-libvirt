@@ -34,7 +34,7 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 	return []mcnflag.Flag{
 		mcnflag.IntFlag{
 			Name:  "crc-libvirt-memory",
-			Usage: "Size of memory for host in MB",
+			Usage: "Size of memory for host in MiB",
 			Value: DefaultMemory,
 		},
 		mcnflag.IntFlag{
@@ -116,21 +116,21 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	return nil
 }
 
-func convertMBToKiB(sizeMb int) uint64 {
-	return uint64(sizeMb) * 1000 * 1000 / 1024
+func convertMiBToKiB(sizeMb int) uint64 {
+	return uint64(sizeMb) * 1024
 }
 
 func (d *Driver) setMemory(memorySize int) error {
-	log.Debugf("Setting memory to %d MB", memorySize)
+	log.Debugf("Setting memory to %d MiB", memorySize)
 	if err := d.validateVMRef(); err != nil {
 		return err
 	}
-	/* d.Memory is in MB, SetMemoryFlags expects kiB */
-	err := d.vm.SetMemoryFlags(convertMBToKiB(memorySize), libvirt.DOMAIN_MEM_MAXIMUM)
+	/* d.Memory is in MiB, SetMemoryFlags expects kiB */
+	err := d.vm.SetMemoryFlags(convertMiBToKiB(memorySize), libvirt.DOMAIN_MEM_MAXIMUM)
 	if err != nil {
 		return err
 	}
-	err = d.vm.SetMemoryFlags(convertMBToKiB(memorySize), libvirt.DOMAIN_MEM_CONFIG)
+	err = d.vm.SetMemoryFlags(convertMiBToKiB(memorySize), libvirt.DOMAIN_MEM_CONFIG)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (d *Driver) UpdateConfigRaw(rawConfig []byte) error {
 	// is it the drivers implementation responsibility to keep a consistent internal state,
 	// and should it return its (partial) new state when an error occurred?
 	if newDriver.Memory != d.Memory {
-		log.Debugf("Updating memory size to %d kiB", newDriver.Memory)
+		log.Debugf("Updating memory size to %d MiB", newDriver.Memory)
 		err := d.setMemory(newDriver.Memory)
 		if err != nil {
 			log.Warnf("Failed to update memory: %v", err)

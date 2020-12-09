@@ -12,7 +12,7 @@ func domainXML(d *Driver, machineType string) (string, error) {
 		Name: d.MachineName,
 		Memory: &libvirtxml.DomainMemory{
 			Value: uint(d.Memory),
-			Unit:  "MB",
+			Unit:  "MiB",
 		},
 		VCPU: &libvirtxml.DomainVCPU{
 			Value: uint(d.CPU),

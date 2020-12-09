@@ -30,7 +30,7 @@ func TestTemplating(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, `<domain type="kvm">
   <name>domain</name>
-  <memory unit="MB">4096</memory>
+  <memory unit="MiB">4096</memory>
   <vcpu>4</vcpu>
   <os>
     <type machine="q35">hvm</type>
