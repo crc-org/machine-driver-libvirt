@@ -57,7 +57,7 @@ func TestTemplating(t *testing.T) {
       <source network="network"></source>
       <model type="virtio"></model>
     </interface>
-    <console></console>
+    <console type="stdio"></console>
     <graphics type="vnc"></graphics>
     <memballoon model="none"></memballoon>
     <rng model="virtio">

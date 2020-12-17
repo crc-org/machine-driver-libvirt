@@ -75,7 +75,11 @@ func domainXML(d *Driver, machineType string) (string, error) {
 				},
 			},
 			Consoles: []libvirtxml.DomainConsole{
-				{},
+				{
+					Source: &libvirtxml.DomainChardevSource{
+						StdIO: &libvirtxml.DomainChardevSourceStdIO{},
+					},
+				},
 			},
 			RNGs: []libvirtxml.DomainRNG{
 				{
