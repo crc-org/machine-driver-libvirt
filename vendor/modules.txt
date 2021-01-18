@@ -1,0 +1,21 @@
+# github.com/code-ready/machine v0.0.0-20210119033255-905110530fde
+github.com/code-ready/machine/drivers/libvirt
+github.com/code-ready/machine/libmachine/drivers
+github.com/code-ready/machine/libmachine/drivers/plugin
+github.com/code-ready/machine/libmachine/drivers/plugin/localbinary
+github.com/code-ready/machine/libmachine/drivers/rpc
+github.com/code-ready/machine/libmachine/log
+github.com/code-ready/machine/libmachine/state
+github.com/code-ready/machine/libmachine/version
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/libvirt/libvirt-go v3.4.0+incompatible
+github.com/libvirt/libvirt-go
+# github.com/libvirt/libvirt-go-xml v6.8.0+incompatible
+github.com/libvirt/libvirt-go-xml
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/stretchr/testify v1.7.0
+github.com/stretchr/testify/assert
+# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+gopkg.in/yaml.v3

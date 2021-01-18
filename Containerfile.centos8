@@ -2,7 +2,7 @@ FROM centos:8
 
 MAINTAINER CodeReady Containers
 
-RUN yum install -y libvirt-devel curl git gcc make golang
+RUN yum install -y libvirt-devel curl git gcc make golang diffutils
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /go/bin v1.30.0
 ENV PATH=/usr/sbin:/usr/bin:/sbin:/bin:/go/bin

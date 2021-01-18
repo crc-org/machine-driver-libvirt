@@ -38,7 +38,7 @@ release: build
 	done
 
 .PHONY: validate
-validate: test lint
+validate: test lint vendorcheck
 
 .PHONY: test
 test:
@@ -47,3 +47,7 @@ test:
 .PHONY: lint
 lint:
 	golangci-lint run
+
+.PHONY: vendorcheck
+vendorcheck:
+	./verify-vendor.sh
