@@ -51,3 +51,8 @@ lint:
 .PHONY: vendorcheck
 vendorcheck:
 	./verify-vendor.sh
+
+.PHONY: vendor
+vendor:
+	go mod tidy
+	go mod vendor
