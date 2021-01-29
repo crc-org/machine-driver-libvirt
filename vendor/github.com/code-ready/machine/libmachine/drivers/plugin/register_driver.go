@@ -11,8 +11,8 @@ import (
 	"github.com/code-ready/machine/libmachine/drivers"
 	"github.com/code-ready/machine/libmachine/drivers/plugin/localbinary"
 	rpcdriver "github.com/code-ready/machine/libmachine/drivers/rpc"
-	"github.com/code-ready/machine/libmachine/log"
 	"github.com/code-ready/machine/libmachine/version"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -29,7 +29,7 @@ Please use this plugin through the main 'crc' binary.
 		os.Exit(1)
 	}
 
-	log.SetDebug(true)
+	log.SetLevel(log.DebugLevel)
 	os.Setenv("MACHINE_DEBUG", "1")
 
 	rpcd := rpcdriver.NewRPCServerDriver(d)

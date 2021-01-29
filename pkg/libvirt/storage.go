@@ -6,8 +6,7 @@ import (
 
 	"github.com/libvirt/libvirt-go"
 	libvirtxml "github.com/libvirt/libvirt-go-xml"
-
-	"github.com/code-ready/machine/libmachine/log"
+	log "github.com/sirupsen/logrus"
 )
 
 func (d *Driver) activateStoragePool(pool *libvirt.StoragePool) error {

@@ -9,14 +9,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/libvirt/libvirt-go"
-	libvirtxml "github.com/libvirt/libvirt-go-xml"
-
-	// Machine-drivers
 	libvirtdriver "github.com/code-ready/machine/drivers/libvirt"
 	"github.com/code-ready/machine/libmachine/drivers"
-	"github.com/code-ready/machine/libmachine/log"
 	"github.com/code-ready/machine/libmachine/state"
+	"github.com/libvirt/libvirt-go"
+	libvirtxml "github.com/libvirt/libvirt-go-xml"
+	log "github.com/sirupsen/logrus"
 )
 
 type Driver struct {
