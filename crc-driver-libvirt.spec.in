@@ -1,0 +1,71 @@
+# https://github.com/code-ready/machine-driver-libvirt
+%global goipath         github.com/code-ready/machine-driver-libvirt
+Version:                0.12.14
+
+%gometa
+
+%global gobuilddir %{_builddir}/%{archivename}/_build
+
+# debuginfo is not supported with Go
+%global debug_package %{nil}
+%global _enable_debug_package 0
+
+%global common_description %{expand:
+CodeReady Container's libvirt machine driver}
+
+
+%global golicenses    LICENSE
+%global godocs        *.md
+
+Name:           %{goname}
+Release:        2%{?dist}
+Summary:        CodeReady Container's libvirt machine driver
+License:        ASL 2.0
+URL:            %{gourl}
+Source0:        %{gosource}
+
+BuildRequires: pkgconfig(libvirt)
+BuildRequires: go-srpm-macros
+BuildRequires: git-core
+
+__BUNDLED_REQUIRES__
+
+%description
+%{common_description}
+
+%gopkg
+
+
+%prep
+# with fedora macros: goprep -k
+%autosetup -S git -n %{archivename}
+install -m 0755 -vd "$(dirname %{gobuilddir}/src/%{goipath})"
+ln -fs "$(pwd)" "%{gobuilddir}/src/%{goipath}"
+
+
+%build
+export GO111MODULE=off
+export GOPATH=$(pwd)/_build:$(pwd)
+%gobuild -o %{gobuilddir}/bin/crc-driver-libvirt %{goipath}/cmd/machine-driver-libvirt
+
+
+%install
+# with fedora macros: gopkginstall
+install -m 0755 -vd                     %{buildroot}%{_bindir}
+install -m 0755 -vp %{gobuilddir}/bin/* %{buildroot}%{_bindir}/
+
+
+%check
+# with fedora macros: gocheck
+# This requires golangci-lint, so disabled for now
+#go test ./...
+
+
+%files
+%license %{golicenses}
+%doc
+%{_bindir}/*
+
+%changelog
+* Wed Feb 03 2021 Christophe Fergeau <cfergeau@redhat.com> - 0.12.14-1
+- Initial import in Fedora

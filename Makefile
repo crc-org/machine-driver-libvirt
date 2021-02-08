@@ -2,6 +2,10 @@ PREFIX=/go
 CMD=crc-driver-libvirt
 DESCRIBE=$(shell git describe --tags)
 CONTAINER_RUNTIME ?= podman
+GOPATH ?= $(shell go env GOPATH)
+# Only keep first path
+gopath=$(firstword $(subst :, , $(GOPATH)))
+
 
 TARGETS=$(addprefix $(CMD)-, centos8 ubuntu20.04)
 
@@ -56,3 +60,14 @@ vendorcheck:
 vendor:
 	go mod tidy
 	go mod vendor
+
+.PHONY: spec
+spec: crc-driver-libvirt.spec
+
+$(gopath)/bin/gomod2rpmdeps:
+	(cd /tmp && GO111MODULE=on go get github.com/cfergeau/gomod2rpmdeps/cmd/gomod2rpmdeps)
+
+%.spec: %.spec.in $(gopath)/bin/gomod2rpmdeps
+	@$(gopath)/bin/gomod2rpmdeps | sed -e '/__BUNDLED_REQUIRES__/r /dev/stdin' \
+					   -e '/__BUNDLED_REQUIRES__/d' \
+				       $< >$@
