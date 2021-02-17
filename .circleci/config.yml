@@ -14,6 +14,9 @@ jobs:
     - run:
        name: Build driver binary
        command: make CONTAINER_RUNTIME="docker"
+    - run:
+        name: Test RPM build
+        command: make CONTAINER_RUNTIME="docker" test-rpmbuild
     - store_artifacts:
        path: ~/work/crc-driver-libvirt-centos8
        destination: crc-driver-libvirt

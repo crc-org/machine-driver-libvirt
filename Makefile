@@ -61,8 +61,11 @@ vendor:
 	go mod tidy
 	go mod vendor
 
-.PHONY: spec
+.PHONY: spec test-rpmbuild
 spec: crc-driver-libvirt.spec
+
+test-rpmbuild: spec
+	${CONTAINER_RUNTIME} build -f Containerfile.rpmbuild .
 
 $(gopath)/bin/gomod2rpmdeps:
 	(cd /tmp && GO111MODULE=on go get github.com/cfergeau/gomod2rpmdeps/cmd/gomod2rpmdeps)

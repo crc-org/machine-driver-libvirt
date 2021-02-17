@@ -1,0 +1,10 @@
+FROM registry.centos.org/centos
+WORKDIR $APP_ROOT/src
+RUN yum -y install git-core rpm-build dnf-plugins-core 'dnf-command(builddep)'
+COPY . .
+RUN mkdir -p ~/rpmbuild/SOURCES/ && \
+    export VERSION=$(rpmspec  -q --qf %{Version} --srpm crc-driver-libvirt.spec) && \
+    git archive --format=tar --prefix=machine-driver-libvirt-${VERSION}/ HEAD | gzip >~/rpmbuild/SOURCES/machine-driver-libvirt-${VERSION}.tar.gz
+RUN yum config-manager --set-enabled powertools && \
+    yum -y builddep crc-driver-libvirt.spec && \
+    rpmbuild -bb -v crc-driver-libvirt.spec
