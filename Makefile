@@ -1,6 +1,7 @@
 PREFIX=/go
 CMD=crc-driver-libvirt
 DESCRIBE=$(shell git describe --tags)
+VERSION=$(shell grep DriverVersion pkg/libvirt/constants.go | awk '{ print $$3 }' | tr -d \")
 CONTAINER_RUNTIME ?= podman
 GOPATH ?= $(shell go env GOPATH)
 # Only keep first path
@@ -73,4 +74,5 @@ $(gopath)/bin/gomod2rpmdeps:
 %.spec: %.spec.in $(gopath)/bin/gomod2rpmdeps
 	@$(gopath)/bin/gomod2rpmdeps | sed -e '/__BUNDLED_REQUIRES__/r /dev/stdin' \
 					   -e '/__BUNDLED_REQUIRES__/d' \
+					   -e 's/__VERSION__/'$(VERSION)'/g' \
 				       $< >$@
