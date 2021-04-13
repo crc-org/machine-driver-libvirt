@@ -400,6 +400,7 @@ func (d *Driver) Start() error {
 
 	if d.IPAddress == "" {
 		log.Warnf("Unable to determine VM's IP address, did it fail to boot?")
+		return fmt.Errorf("Unable to determine VM's IP address, did it fail to boot?")
 	}
 	return nil
 }
