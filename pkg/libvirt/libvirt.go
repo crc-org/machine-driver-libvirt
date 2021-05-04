@@ -474,12 +474,8 @@ func (d *Driver) GetState() (state.State, error) {
 	switch virState {
 	case libvirt.DOMAIN_RUNNING:
 		return state.Running, nil
-	case libvirt.DOMAIN_PAUSED:
-		return state.Paused, nil
 	case libvirt.DOMAIN_SHUTDOWN:
 		return state.Stopped, nil
-	case libvirt.DOMAIN_PMSUSPENDED:
-		return state.Saved, nil
 	case libvirt.DOMAIN_SHUTOFF:
 		return state.Stopped, nil
 	}
