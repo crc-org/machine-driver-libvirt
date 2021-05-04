@@ -465,32 +465,25 @@ func (d *Driver) Kill() error {
 func (d *Driver) GetState() (state.State, error) {
 	log.Debugf("Getting current state...")
 	if err := d.validateVMRef(); err != nil {
-		return state.None, err
+		return state.Error, err
 	}
 	virState, _, err := d.vm.GetState()
 	if err != nil {
-		return state.None, err
+		return state.Error, err
 	}
 	switch virState {
-	case libvirt.DOMAIN_NOSTATE:
-		return state.None, nil
 	case libvirt.DOMAIN_RUNNING:
 		return state.Running, nil
-	case libvirt.DOMAIN_BLOCKED:
-		// TODO - Not really correct, but does it matter?
-		return state.Error, nil
 	case libvirt.DOMAIN_PAUSED:
 		return state.Paused, nil
 	case libvirt.DOMAIN_SHUTDOWN:
 		return state.Stopped, nil
-	case libvirt.DOMAIN_CRASHED:
-		return state.Error, nil
 	case libvirt.DOMAIN_PMSUSPENDED:
 		return state.Saved, nil
 	case libvirt.DOMAIN_SHUTOFF:
 		return state.Stopped, nil
 	}
-	return state.None, nil
+	return state.Error, fmt.Errorf("unexpected libvirt status %d", virState)
 }
 
 func (d *Driver) validateVMRef() error {
