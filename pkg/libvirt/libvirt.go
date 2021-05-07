@@ -467,7 +467,7 @@ func (d *Driver) GetState() (state.State, error) {
 	if err := d.validateVMRef(); err != nil {
 		return state.Error, err
 	}
-	virState, _, err := d.vm.GetState()
+	virState, reason, err := d.vm.GetState()
 	if err != nil {
 		return state.Error, err
 	}
@@ -478,6 +478,10 @@ func (d *Driver) GetState() (state.State, error) {
 		return state.Stopped, nil
 	case libvirt.DOMAIN_SHUTOFF:
 		return state.Stopped, nil
+	case libvirt.DOMAIN_PAUSED:
+		if libvirt.DomainPausedReason(reason) == libvirt.DOMAIN_PAUSED_STARTING_UP {
+			return state.Running, nil
+		}
 	}
 	return state.Error, fmt.Errorf("unexpected libvirt status %d", virState)
 }
