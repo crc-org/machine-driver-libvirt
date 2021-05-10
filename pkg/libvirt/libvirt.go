@@ -316,8 +316,6 @@ func (d *Driver) Create() error {
 	}
 	d.vm = vm
 	d.vmLoaded = true
-	log.Debugf("Adding the file: %s", filepath.Join(d.ResolveStorePath("."), fmt.Sprintf(".%s-exist", d.MachineName)))
-	_, _ = os.OpenFile(filepath.Join(d.ResolveStorePath("."), fmt.Sprintf(".%s-exist", d.MachineName)), os.O_RDONLY|os.O_CREATE, 0666)
 
 	_, err = d.resizeDiskImageIfNeeded(d.DiskCapacity)
 	if err != nil {
