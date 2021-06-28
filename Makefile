@@ -8,7 +8,7 @@ GOPATH ?= $(shell go env GOPATH)
 gopath=$(firstword $(subst :, , $(GOPATH)))
 
 
-TARGETS=$(addprefix $(CMD)-, centos8 ubuntu20.04)
+TARGETS=$(addprefix $(CMD)-, centos8)
 
 build: $(TARGETS)
 
