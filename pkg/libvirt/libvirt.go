@@ -434,8 +434,9 @@ func (d *Driver) Stop() error {
 
 func (d *Driver) Remove() error {
 	log.Debugf("Removing VM %s", d.MachineName)
-	if err := d.validateVMRef(); err != nil {
-		return err
+	_ = d.validateVMRef()
+	if !d.vmLoaded {
+		return nil
 	}
 	// Note: If we switch to qcow disks instead of raw the user
 	//       could take a snapshot.  If you do, then Undefine
