@@ -1,7 +1,7 @@
 package libvirt
 
 import (
-	libvirtxml "github.com/libvirt/libvirt-go-xml"
+	"libvirt.org/go/libvirtxml"
 )
 
 const macAddress = "52:fd:fc:07:21:82"
