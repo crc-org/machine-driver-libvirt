@@ -13,8 +13,8 @@ import (
 	"github.com/code-ready/machine/libmachine/drivers"
 	"github.com/code-ready/machine/libmachine/state"
 	"github.com/libvirt/libvirt-go"
-	libvirtxml "github.com/libvirt/libvirt-go-xml"
 	log "github.com/sirupsen/logrus"
+	"libvirt.org/go/libvirtxml"
 )
 
 type Driver struct {

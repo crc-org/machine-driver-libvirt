@@ -1,5 +1,5 @@
 /*
- * This file is part of the libvirt-go-xml project
+ * This file is part of the libvirt-go-xml-module project
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,6 +66,9 @@ type NodeDeviceCapability struct {
 	CCW        *NodeDeviceCCWCapability
 	MDev       *NodeDeviceMDevCapability
 	CSS        *NodeDeviceCSSCapability
+	APQueue    *NodeDeviceAPQueueCapability
+	APCard     *NodeDeviceAPCardCapability
+	APMatrix   *NodeDeviceAPMatrixCapability
 }
 
 type NodeDeviceIDName struct {
@@ -119,6 +122,7 @@ type NodeDevicePCISubCapability struct {
 	PhysFunction  *NodeDevicePCIPhysFunctionCapability
 	MDevTypes     *NodeDevicePCIMDevTypesCapability
 	Bridge        *NodeDevicePCIBridgeCapability
+	VPD           *NodeDevicePCIVPDCapability
 }
 
 type NodeDevicePCIVirtFunctionsCapability struct {
@@ -131,10 +135,10 @@ type NodeDevicePCIPhysFunctionCapability struct {
 }
 
 type NodeDevicePCIMDevTypesCapability struct {
-	Types []NodeDevicePCIMDevType `xml:"type"`
+	Types []NodeDeviceMDevType `xml:"type"`
 }
 
-type NodeDevicePCIMDevType struct {
+type NodeDeviceMDevType struct {
 	ID                 string `xml:"id,attr"`
 	Name               string `xml:"name"`
 	DeviceAPI          string `xml:"deviceAPI"`
@@ -142,6 +146,31 @@ type NodeDevicePCIMDevType struct {
 }
 
 type NodeDevicePCIBridgeCapability struct {
+}
+
+type NodeDevicePCIVPDCapability struct {
+	Name      string                    `xml:"name,omitempty"`
+	ReadOnly  *NodeDevicePCIVPDFieldsRO `xml:"-"`
+	ReadWrite *NodeDevicePCIVPDFieldsRW `xml:"-"`
+}
+
+type NodeDevicePCIVPDFieldsRO struct {
+	ChangeLevel   string                        `xml:"change_level,omitempty"`
+	ManufactureID string                        `xml:"manufacture_id,omitempty"`
+	PartNumber    string                        `xml:"part_number,omitempty"`
+	SerialNumber  string                        `xml:"serial_number,omitempty"`
+	VendorFields  []NodeDevicePCIVPDCustomField `xml:"vendor_field"`
+}
+
+type NodeDevicePCIVPDFieldsRW struct {
+	AssetTag     string                        `xml:"asset_tag,omitempty"`
+	VendorFields []NodeDevicePCIVPDCustomField `xml:"vendor_field"`
+	SystemFields []NodeDevicePCIVPDCustomField `xml:"system_field"`
+}
+
+type NodeDevicePCIVPDCustomField struct {
+	Index string `xml:"index,attr"`
+	Value string `xml:",chardata"`
 }
 
 type NodeDeviceSystemHardware struct {
@@ -288,6 +317,7 @@ type NodeDeviceCCWCapability struct {
 type NodeDeviceMDevCapability struct {
 	Type       *NodeDeviceMDevCapabilityType   `xml:"type"`
 	IOMMUGroup *NodeDeviceIOMMUGroup           `xml:"iommuGroup"`
+	UUID       string                          `xml:"uuid,omitempty"`
 	Attrs      []NodeDeviceMDevCapabilityAttrs `xml:"attr,omitempty"`
 }
 
@@ -301,9 +331,39 @@ type NodeDeviceMDevCapabilityAttrs struct {
 }
 
 type NodeDeviceCSSCapability struct {
-	CSSID *uint `xml:"cssid"`
-	SSID  *uint `xml:"ssid"`
-	DevNo *uint `xml:"devno"`
+	CSSID        *uint                        `xml:"cssid"`
+	SSID         *uint                        `xml:"ssid"`
+	DevNo        *uint                        `xml:"devno"`
+	Capabilities []NodeDeviceCSSSubCapability `xml:"capability"`
+}
+
+type NodeDeviceCSSSubCapability struct {
+	MDevTypes *NodeDeviceCSSMDevTypesCapability
+}
+
+type NodeDeviceCSSMDevTypesCapability struct {
+	Types []NodeDeviceMDevType `xml:"type"`
+}
+
+type NodeDeviceAPQueueCapability struct {
+	APAdapter string `xml:"ap-adapter"`
+	APDomain  string `xml:"ap-domain"`
+}
+
+type NodeDeviceAPCardCapability struct {
+	APAdapter string `xml:"ap-adapter"`
+}
+
+type NodeDeviceAPMatrixCapability struct {
+	Capabilities []NodeDeviceAPMatrixSubCapability `xml:"capability"`
+}
+
+type NodeDeviceAPMatrixSubCapability struct {
+	MDevTypes *NodeDeviceAPMatrixMDevTypesCapability
+}
+
+type NodeDeviceAPMatrixMDevTypesCapability struct {
+	Types []NodeDeviceMDevType `xml:"type"`
 }
 
 func (a *NodeDevicePCIAddress) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -337,6 +397,34 @@ func (a *NodeDevicePCIAddress) UnmarshalXML(d *xml.Decoder, start xml.StartEleme
 		}
 	}
 	d.Skip()
+	return nil
+}
+
+func (c *NodeDeviceCSSSubCapability) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	typ, ok := getAttr(start.Attr, "type")
+	if !ok {
+		return fmt.Errorf("Missing node device capability type")
+	}
+
+	switch typ {
+	case "mdev_types":
+		var mdevTypesCaps NodeDeviceCSSMDevTypesCapability
+		if err := d.DecodeElement(&mdevTypesCaps, &start); err != nil {
+			return err
+		}
+		c.MDevTypes = &mdevTypesCaps
+	}
+	d.Skip()
+	return nil
+}
+
+func (c *NodeDeviceCSSSubCapability) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if c.MDevTypes != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "type"}, "mdev_types",
+		})
+		return e.EncodeElement(c.MDevTypes, start)
+	}
 	return nil
 }
 
@@ -443,6 +531,14 @@ func (c *NodeDeviceCSSCapability) MarshalXML(e *xml.Encoder, start xml.StartElem
 		e.EncodeToken(xml.CharData(fmt.Sprintf("0x%04x", *c.DevNo)))
 		e.EncodeToken(devno.End())
 	}
+	if c.Capabilities != nil {
+		for _, subcap := range c.Capabilities {
+			start := xml.StartElement{
+				Name: xml.Name{Local: "capability"},
+			}
+			e.EncodeElement(&subcap, start)
+		}
+	}
 	e.EncodeToken(start.End())
 	return nil
 }
@@ -462,6 +558,16 @@ func (c *NodeDeviceCSSCapability) UnmarshalXML(d *xml.Decoder, start xml.StartEl
 			cdata, err := d.Token()
 			if err != nil {
 				return err
+			}
+
+			if tok.Name.Local == "capability" {
+				subcap := &NodeDeviceCSSSubCapability{}
+				err := d.DecodeElement(subcap, &tok)
+				if err != nil {
+					return err
+				}
+				c.Capabilities = append(c.Capabilities, *subcap)
+				continue
 			}
 
 			if tok.Name.Local != "cssid" &&
@@ -525,6 +631,12 @@ func (c *NodeDevicePCISubCapability) UnmarshalXML(d *xml.Decoder, start xml.Star
 			return err
 		}
 		c.Bridge = &bridgeCaps
+	case "vpd":
+		var vpdCaps NodeDevicePCIVPDCapability
+		if err := d.DecodeElement(&vpdCaps, &start); err != nil {
+			return err
+		}
+		c.VPD = &vpdCaps
 	}
 	d.Skip()
 	return nil
@@ -551,6 +663,11 @@ func (c *NodeDevicePCISubCapability) MarshalXML(e *xml.Encoder, start xml.StartE
 			xml.Name{Local: "type"}, "pci-bridge",
 		})
 		return e.EncodeElement(c.Bridge, start)
+	} else if c.VPD != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "type"}, "vpd",
+		})
+		return e.EncodeElement(c.VPD, start)
 	}
 	return nil
 }
@@ -689,6 +806,116 @@ func (c *NodeDeviceNetSubCapability) MarshalXML(e *xml.Encoder, start xml.StartE
 	return nil
 }
 
+func (c *NodeDeviceAPMatrixSubCapability) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	typ, ok := getAttr(start.Attr, "type")
+	if !ok {
+		return fmt.Errorf("Missing node device capability type")
+	}
+
+	switch typ {
+	case "mdev_types":
+		var mdevTypeCaps NodeDeviceAPMatrixMDevTypesCapability
+		if err := d.DecodeElement(&mdevTypeCaps, &start); err != nil {
+			return err
+		}
+		c.MDevTypes = &mdevTypeCaps
+	}
+	d.Skip()
+	return nil
+}
+
+func (c *NodeDeviceAPMatrixSubCapability) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if c.MDevTypes != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "type"}, "mdev_types",
+		})
+		return e.EncodeElement(c.MDevTypes, start)
+	}
+	return nil
+}
+
+type nodeDevicePCIVPDFields struct {
+	ReadOnly  *NodeDevicePCIVPDFieldsRO
+	ReadWrite *NodeDevicePCIVPDFieldsRW
+}
+
+type nodeDevicePCIVPDCapability struct {
+	Name   string                   `xml:"name,omitempty"`
+	Fields []nodeDevicePCIVPDFields `xml:"fields"`
+}
+
+func (c *nodeDevicePCIVPDFields) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	acc, ok := getAttr(start.Attr, "access")
+	if !ok {
+		return fmt.Errorf("Missing node device PCI VPD capability access")
+	}
+
+	switch acc {
+	case "readonly":
+		var ro NodeDevicePCIVPDFieldsRO
+		if err := d.DecodeElement(&ro, &start); err != nil {
+			return err
+		}
+		c.ReadOnly = &ro
+	case "readwrite":
+		var rw NodeDevicePCIVPDFieldsRW
+		if err := d.DecodeElement(&rw, &start); err != nil {
+			return err
+		}
+		c.ReadWrite = &rw
+	}
+	d.Skip()
+	return nil
+}
+
+func (c *NodeDevicePCIVPDCapability) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	var ccopy nodeDevicePCIVPDCapability
+	ccopy.Name = c.Name
+	if c.ReadOnly != nil {
+		ccopy.Fields = append(ccopy.Fields, nodeDevicePCIVPDFields{
+			ReadOnly: c.ReadOnly,
+		})
+	}
+	if c.ReadWrite != nil {
+		ccopy.Fields = append(ccopy.Fields, nodeDevicePCIVPDFields{
+			ReadWrite: c.ReadWrite,
+		})
+	}
+	e.EncodeElement(&ccopy, start)
+	return nil
+}
+
+func (c *NodeDevicePCIVPDCapability) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var ccopy nodeDevicePCIVPDCapability
+	if err := d.DecodeElement(&ccopy, &start); err != nil {
+		return err
+	}
+	c.Name = ccopy.Name
+	for _, field := range ccopy.Fields {
+		if field.ReadOnly != nil {
+			c.ReadOnly = field.ReadOnly
+		} else if field.ReadWrite != nil {
+			c.ReadWrite = field.ReadWrite
+		}
+	}
+	return nil
+}
+
+func (c *nodeDevicePCIVPDFields) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if c.ReadOnly != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "access"}, "readonly",
+		})
+		return e.EncodeElement(c.ReadOnly, start)
+	} else if c.ReadWrite != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "access"}, "readwrite",
+		})
+		return e.EncodeElement(c.ReadWrite, start)
+	}
+	return nil
+}
+
 func (c *NodeDeviceCapability) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	typ, ok := getAttr(start.Attr, "type")
 	if !ok {
@@ -774,6 +1001,24 @@ func (c *NodeDeviceCapability) UnmarshalXML(d *xml.Decoder, start xml.StartEleme
 			return err
 		}
 		c.CSS = &cssCaps
+	case "ap_queue":
+		var apCaps NodeDeviceAPQueueCapability
+		if err := d.DecodeElement(&apCaps, &start); err != nil {
+			return err
+		}
+		c.APQueue = &apCaps
+	case "ap_matrix":
+		var apCaps NodeDeviceAPMatrixCapability
+		if err := d.DecodeElement(&apCaps, &start); err != nil {
+			return err
+		}
+		c.APMatrix = &apCaps
+	case "ap_card":
+		var apCaps NodeDeviceAPCardCapability
+		if err := d.DecodeElement(&apCaps, &start); err != nil {
+			return err
+		}
+		c.APCard = &apCaps
 	}
 	d.Skip()
 	return nil
@@ -845,6 +1090,21 @@ func (c *NodeDeviceCapability) MarshalXML(e *xml.Encoder, start xml.StartElement
 			xml.Name{Local: "type"}, "css",
 		})
 		return e.EncodeElement(c.CSS, start)
+	} else if c.APQueue != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "type"}, "ap_queue",
+		})
+		return e.EncodeElement(c.APQueue, start)
+	} else if c.APCard != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "type"}, "ap_card",
+		})
+		return e.EncodeElement(c.APCard, start)
+	} else if c.APMatrix != nil {
+		start.Attr = append(start.Attr, xml.Attr{
+			xml.Name{Local: "type"}, "ap_matrix",
+		})
+		return e.EncodeElement(c.APMatrix, start)
 	}
 	return nil
 }
