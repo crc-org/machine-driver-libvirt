@@ -318,11 +318,8 @@ func (d *Driver) Create() error {
 	d.vmLoaded = true
 
 	_, err = d.resizeDiskImageIfNeeded(d.DiskCapacity)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func createImage(src, dst string) error {
