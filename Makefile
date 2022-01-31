@@ -6,6 +6,7 @@ CONTAINER_RUNTIME ?= podman
 GOPATH ?= $(shell go env GOPATH)
 # Only keep first path
 gopath=$(firstword $(subst :, , $(GOPATH)))
+GOLANGCI_LINT_VERSION = v1.41.1
 
 
 TARGETS=$(addprefix $(CMD)-, centos8)
@@ -49,9 +50,15 @@ validate: test lint vendorcheck
 test:
 	go test ./...
 
+.PHONY: golangci-lint
+golangci-lint:
+	@if $(GOPATH)/bin/golangci-lint version 2>&1 | grep -vq $(GOLANGCI_LINT_VERSION); then\
+		cd /tmp && GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION); \
+	fi
+
 .PHONY: lint
-lint:
-	golangci-lint run
+lint: golangci-lint
+	$(GOPATH)/bin/golangci-lint run
 
 .PHONY: vendorcheck
 vendorcheck:
