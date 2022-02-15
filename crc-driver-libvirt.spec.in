@@ -1,5 +1,6 @@
 # https://github.com/code-ready/machine-driver-libvirt
 %global goipath         github.com/code-ready/machine-driver-libvirt
+%global goname          crc-driver-libvirt
 Version:                __VERSION__
 
 %gometa
