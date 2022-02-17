@@ -76,7 +76,7 @@ func (d *Driver) createStoragePool() (*libvirt.StoragePool, error) {
 		return nil, err
 	}
 	log.Infof("Creating storage pool with XML %s", poolXML)
-	pool, err := conn.StoragePoolDefineXML(poolXML, uint32(libvirt.STORAGE_POOL_CREATE_NORMAL))
+	pool, err := conn.StoragePoolDefineXML(poolXML, 0)
 	if err != nil {
 		log.Debugf("Could not create storage pool %s", d.StoragePool)
 		return nil, fmt.Errorf("Use 'crc setup' to define the storage pool, %+v", err)
