@@ -14,7 +14,7 @@ TARGETS=$(addprefix $(CMD)-, centos8)
 build: $(TARGETS)
 
 local:
-	go build -i -v -o crc-driver-libvirt-local ./cmd/machine-driver-libvirt
+	go build -v -o crc-driver-libvirt-local ./cmd/machine-driver-libvirt
 
 $(CMD)-%: Containerfile.%
 	${CONTAINER_RUNTIME} rmi -f $@ >/dev/null  2>&1 || true
