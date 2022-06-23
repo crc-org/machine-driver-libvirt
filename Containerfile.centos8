@@ -1,6 +1,6 @@
 FROM quay.io/centos/centos:stream8
 
-MAINTAINER CodeReady Containers
+MAINTAINER CRC team
 
 RUN yum install -y libvirt-devel curl git gcc make golang diffutils
 
