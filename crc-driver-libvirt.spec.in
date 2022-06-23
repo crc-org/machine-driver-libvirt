@@ -12,7 +12,7 @@ Version:                __VERSION__
 %global _enable_debug_package 0
 
 %global common_description %{expand:
-CodeReady Container's libvirt machine driver}
+CRC's libvirt machine driver}
 
 
 %global golicenses    LICENSE
@@ -20,7 +20,7 @@ CodeReady Container's libvirt machine driver}
 
 Name:           %{goname}
 Release:        2%{?dist}
-Summary:        CodeReady Container's libvirt machine driver
+Summary:        CRC's libvirt machine driver
 License:        ASL 2.0
 URL:            %{gourl}
 Source0:        %{gosource}
