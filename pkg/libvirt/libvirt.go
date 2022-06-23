@@ -34,6 +34,10 @@ func (d *Driver) GetSSHHostname() (string, error) {
 	return d.GetIP()
 }
 
+func (d *Driver) GetSharedDirs() ([]drivers.SharedDir, error) {
+	return d.SharedDirs(), nil
+}
+
 func (d *Driver) DriverName() string {
 	return DriverName
 }
