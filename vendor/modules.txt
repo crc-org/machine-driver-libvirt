@@ -19,18 +19,18 @@ github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.7.4
 ## explicit
 github.com/stretchr/testify/assert
-# golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27
+# golang.org/x/sys v0.0.0-20220622161953-175b2fd9d664
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 ## explicit
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.1
 gopkg.in/yaml.v3
-# libvirt.org/go/libvirtxml v1.7010.0
+# libvirt.org/go/libvirtxml v1.8004.0
 ## explicit
 libvirt.org/go/libvirtxml
