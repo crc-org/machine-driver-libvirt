@@ -11,7 +11,7 @@ github.com/code-ready/machine/libmachine/version
 github.com/davecgh/go-spew/spew
 # github.com/kr/text v0.2.0
 ## explicit
-# github.com/libvirt/libvirt-go v3.4.0+incompatible
+# github.com/libvirt/libvirt-go v4.5.0+incompatible
 ## explicit
 github.com/libvirt/libvirt-go
 # github.com/pmezard/go-difflib v1.0.0
