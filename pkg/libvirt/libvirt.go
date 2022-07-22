@@ -35,7 +35,10 @@ func (d *Driver) GetSSHHostname() (string, error) {
 }
 
 func (d *Driver) GetSharedDirs() ([]drivers.SharedDir, error) {
-	return d.SharedDirs(), nil
+	if err := virtiofsSupported(d.conn); err != nil {
+		return nil, err
+	}
+	return d.SharedDirs, nil
 }
 
 func (d *Driver) DriverName() string {

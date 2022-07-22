@@ -1,7 +1,12 @@
 package libvirt
 
 import (
+	"fmt"
+
+	"github.com/libvirt/libvirt-go"
 	"libvirt.org/go/libvirtxml"
+
+	"github.com/code-ready/machine/libmachine/drivers"
 )
 
 const macAddress = "52:fd:fc:07:21:82"
@@ -114,7 +119,7 @@ func domainXML(d *Driver, machineType string) (string, error) {
 			},
 		}
 	}
-	if len(d.SharedDirs) != 0 {
+	if virtiofsSupported(d.conn) == nil && len(d.SharedDirs) != 0 {
 		domain.MemoryBacking = &libvirtxml.DomainMemoryBacking{
 			MemorySource: &libvirtxml.DomainMemorySource{
 				Type: "memfd",
@@ -151,4 +156,38 @@ func domainXML(d *Driver, machineType string) (string, error) {
 		}
 	}
 	return domain.Marshal()
+}
+
+func virtiofsSupported(conn *libvirt.Connect) error {
+	guest, err := getBestGuestFromCaps(conn)
+	if err != nil {
+		return err
+	}
+
+	domainCapsXML, err := conn.GetDomainCapabilities(guest.Arch.Emulator, guest.Arch.Name, getMachineType(guest), "kvm", 0)
+	if err != nil {
+		return err
+	}
+
+	caps := &libvirtxml.DomainCaps{}
+	err = caps.Unmarshal(domainCapsXML)
+	if err != nil {
+		return fmt.Errorf("Error parsing libvirt domain capabilities: %w", err)
+	}
+
+	if caps.Devices.FileSystem.Supported != "yes" {
+		return drivers.ErrNotSupported
+	}
+	for _, enum := range caps.Devices.FileSystem.Enums {
+		if enum.Name != "driverType" {
+			continue
+		}
+		for _, val := range enum.Values {
+			if val == "virtiofs" {
+				return nil
+			}
+		}
+	}
+
+	return drivers.ErrNotSupported
 }
