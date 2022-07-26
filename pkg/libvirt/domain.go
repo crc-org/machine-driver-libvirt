@@ -53,10 +53,8 @@ func domainXML(d *Driver, machineType string) (string, error) {
 				{
 					Device: "disk",
 					Driver: &libvirtxml.DomainDiskDriver{
-						Name:  "qemu",
-						Type:  "qcow2",
-						Cache: d.CacheMode,
-						IO:    d.IOMode,
+						Name: "qemu",
+						Type: "qcow2",
 					},
 					Source: &libvirtxml.DomainDiskSource{
 						File: &libvirtxml.DomainDiskSourceFile{
