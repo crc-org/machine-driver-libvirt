@@ -48,7 +48,7 @@ func TestTemplating(t *testing.T) {
   <clock offset="utc"></clock>
   <devices>
     <disk type="file" device="disk">
-      <driver name="qemu" type="qcow2" cache="default" io="threads"></driver>
+      <driver name="qemu" type="qcow2"></driver>
       <source file="machines/domain/domain.test"></source>
       <target dev="vda" bus="virtio"></target>
     </disk>
