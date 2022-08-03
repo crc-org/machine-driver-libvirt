@@ -177,6 +177,10 @@ func virtiofsSupported(conn *libvirt.Connect) error {
 		return fmt.Errorf("Error parsing libvirt domain capabilities: %w", err)
 	}
 
+	if caps.Devices.FileSystem == nil {
+		return drivers.ErrNotSupported
+	}
+
 	if caps.Devices.FileSystem.Supported != "yes" {
 		return drivers.ErrNotSupported
 	}
