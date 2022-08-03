@@ -2,7 +2,7 @@ package libvirt
 
 const (
 	DriverName    = "libvirt"
-	DriverVersion = "0.13.4"
+	DriverVersion = "0.13.5"
 
 	connectionString = "qemu:///system"
 	DefaultNetwork   = "crc"
