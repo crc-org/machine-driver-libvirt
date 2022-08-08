@@ -159,6 +159,10 @@ func domainXML(d *Driver, machineType string) (string, error) {
 }
 
 func virtiofsSupported(conn *libvirt.Connect) error {
+	if conn == nil {
+		return drivers.ErrNotSupported
+	}
+
 	guest, err := getBestGuestFromCaps(conn)
 	if err != nil {
 		return err
