@@ -119,33 +119,31 @@ func domainXML(d *Driver, machineType string) (string, error) {
 			},
 		}
 	}
-	if len(d.SharedDirs) != 0 {
-		if virtiofsSupported(d.conn) == nil {
-			domain.MemoryBacking = &libvirtxml.DomainMemoryBacking{
-				MemorySource: &libvirtxml.DomainMemorySource{
-					Type: "memfd",
+	if virtiofsSupported(d.conn) == nil && len(d.SharedDirs) != 0 {
+		domain.MemoryBacking = &libvirtxml.DomainMemoryBacking{
+			MemorySource: &libvirtxml.DomainMemorySource{
+				Type: "memfd",
+			},
+			MemoryAccess: &libvirtxml.DomainMemoryAccess{
+				Mode: "shared",
+			},
+		}
+		for _, sharedDir := range d.SharedDirs {
+			filesystem := libvirtxml.DomainFilesystem{
+				AccessMode: "passthrough",
+				Driver: &libvirtxml.DomainFilesystemDriver{
+					Type: "virtiofs",
 				},
-				MemoryAccess: &libvirtxml.DomainMemoryAccess{
-					Mode: "shared",
+				Source: &libvirtxml.DomainFilesystemSource{
+					Mount: &libvirtxml.DomainFilesystemSourceMount{
+						Dir: sharedDir.Source,
+					},
+				},
+				Target: &libvirtxml.DomainFilesystemTarget{
+					Dir: sharedDir.Tag,
 				},
 			}
-			for _, sharedDir := range d.SharedDirs {
-				filesystem := libvirtxml.DomainFilesystem{
-					AccessMode: "passthrough",
-					Driver: &libvirtxml.DomainFilesystemDriver{
-						Type: "virtiofs",
-					},
-					Source: &libvirtxml.DomainFilesystemSource{
-						Mount: &libvirtxml.DomainFilesystemSourceMount{
-							Dir: sharedDir.Source,
-						},
-					},
-					Target: &libvirtxml.DomainFilesystemTarget{
-						Dir: sharedDir.Tag,
-					},
-				}
-				domain.Devices.Filesystems = append(domain.Devices.Filesystems, filesystem)
-			}
+			domain.Devices.Filesystems = append(domain.Devices.Filesystems, filesystem)
 		}
 	}
 
