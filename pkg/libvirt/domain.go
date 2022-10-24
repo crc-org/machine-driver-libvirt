@@ -6,7 +6,7 @@ import (
 	"github.com/libvirt/libvirt-go"
 	"libvirt.org/go/libvirtxml"
 
-	"github.com/code-ready/machine/libmachine/drivers"
+	"github.com/crc-org/machine/libmachine/drivers"
 )
 
 const macAddress = "52:fd:fc:07:21:82"

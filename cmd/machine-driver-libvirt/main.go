@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/code-ready/machine-driver-libvirt/pkg/libvirt"
-	"github.com/code-ready/machine/libmachine/drivers/plugin"
+	"github.com/crc-org/machine/libmachine/drivers/plugin"
 )
 
 func main() {

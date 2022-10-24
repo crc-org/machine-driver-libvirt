@@ -1,12 +1,12 @@
-# github.com/code-ready/machine v0.0.0-20220727160217-7bf0dd8c2d7b
+# github.com/crc-org/machine v0.0.0-20221028075518-f9b43442196b
 ## explicit; go 1.17
-github.com/code-ready/machine/drivers/libvirt
-github.com/code-ready/machine/libmachine/drivers
-github.com/code-ready/machine/libmachine/drivers/plugin
-github.com/code-ready/machine/libmachine/drivers/plugin/localbinary
-github.com/code-ready/machine/libmachine/drivers/rpc
-github.com/code-ready/machine/libmachine/state
-github.com/code-ready/machine/libmachine/version
+github.com/crc-org/machine/drivers/libvirt
+github.com/crc-org/machine/libmachine/drivers
+github.com/crc-org/machine/libmachine/drivers/plugin
+github.com/crc-org/machine/libmachine/drivers/plugin/localbinary
+github.com/crc-org/machine/libmachine/drivers/rpc
+github.com/crc-org/machine/libmachine/state
+github.com/crc-org/machine/libmachine/version
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
