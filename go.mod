@@ -1,7 +1,7 @@
 module github.com/code-ready/machine-driver-libvirt
 
 require (
-	github.com/code-ready/machine v0.0.0-20220727160217-7bf0dd8c2d7b
+	github.com/crc-org/machine v0.0.0-20221028075518-f9b43442196b
 	github.com/libvirt/libvirt-go v4.5.0+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.0
