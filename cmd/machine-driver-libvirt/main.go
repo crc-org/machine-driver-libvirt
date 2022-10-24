@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/code-ready/machine-driver-libvirt/pkg/libvirt"
+	"github.com/crc-org/machine-driver-libvirt/pkg/libvirt"
 	"github.com/crc-org/machine/libmachine/drivers/plugin"
 )
 
