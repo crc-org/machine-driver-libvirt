@@ -1,4 +1,4 @@
-module github.com/code-ready/machine-driver-libvirt
+module github.com/crc-org/machine-driver-libvirt
 
 require (
 	github.com/crc-org/machine v0.0.0-20221028075518-f9b43442196b

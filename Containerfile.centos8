@@ -8,8 +8,8 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 ENV PATH=/usr/sbin:/usr/bin:/sbin:/bin:/go/bin
 
 
-COPY . /go/src/github.com/code-ready/machine-driver-libvirt
-WORKDIR /go/src/github.com/code-ready/machine-driver-libvirt
+COPY . /go/src/github.com/crc-org/machine-driver-libvirt
+WORKDIR /go/src/github.com/crc-org/machine-driver-libvirt
 
 RUN make validate
 RUN go build -i -v -ldflags="-s -w" -o /go/bin/crc-driver-libvirt ./cmd/machine-driver-libvirt
