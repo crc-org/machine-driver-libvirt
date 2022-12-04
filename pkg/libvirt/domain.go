@@ -142,6 +142,10 @@ func domainXML(d *Driver, machineType string) (string, error) {
 				Target: &libvirtxml.DomainFilesystemTarget{
 					Dir: sharedDir.Tag,
 				},
+				Binary: &libvirtxml.DomainFilesystemBinary{
+					Path: "/run/current-system/sw/bin/virtiofsd",
+					Xattr: "on",
+				},
 			}
 			domain.Devices.Filesystems = append(domain.Devices.Filesystems, filesystem)
 		}
