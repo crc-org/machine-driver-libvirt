@@ -1,4 +1,3 @@
-PREFIX=/go
 CMD=crc-driver-libvirt
 DESCRIBE=$(shell git describe --tags)
 VERSION=$(shell grep DriverVersion pkg/libvirt/constants.go | awk '{ print $$3 }' | tr -d \")
@@ -20,8 +19,7 @@ $(CMD)-%: Containerfile.%
 	echo "Building binaries for $@"
 	${CONTAINER_RUNTIME} build -t $@ -f $< .
 	${CONTAINER_RUNTIME} create --name $@-extract $@ sh
-	${CONTAINER_RUNTIME} cp $@-extract:$(PREFIX)/bin/$(CMD) ./
-	mv ./$(CMD) ./$@
+	${CONTAINER_RUNTIME} cp $@-extract:/go/bin/$(CMD) ./$@
 	${CONTAINER_RUNTIME} rm $@-extract || true
 	${CONTAINER_RUNTIME} rmi $@ || true
 
