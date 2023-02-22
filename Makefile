@@ -6,7 +6,7 @@ CONTAINER_RUNTIME ?= podman
 GOPATH ?= $(shell go env GOPATH)
 # Only keep first path
 gopath=$(firstword $(subst :, , $(GOPATH)))
-GOLANGCI_LINT_VERSION = v1.46.2
+GOLANGCI_LINT_VERSION = v1.51.2
 TOOLS_BINDIR = $(realpath tools/bin)
 
 
