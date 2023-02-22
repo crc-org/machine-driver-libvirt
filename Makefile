@@ -3,16 +3,13 @@ CMD=crc-driver-libvirt
 DESCRIBE=$(shell git describe --tags)
 VERSION=$(shell grep DriverVersion pkg/libvirt/constants.go | awk '{ print $$3 }' | tr -d \")
 CONTAINER_RUNTIME ?= podman
-GOPATH ?= $(shell go env GOPATH)
-# Only keep first path
-gopath=$(firstword $(subst :, , $(GOPATH)))
-GOLANGCI_LINT_VERSION = v1.51.2
-TOOLS_BINDIR = $(realpath tools/bin)
-
 
 TARGETS=$(addprefix $(CMD)-, centos8)
 
 build: $(TARGETS)
+
+TOOLS_DIR := tools
+include tools/tools.mk
 
 local:
 	go build -v -o crc-driver-libvirt-local ./cmd/machine-driver-libvirt
@@ -51,15 +48,8 @@ validate: test lint vendorcheck
 test:
 	go test ./...
 
-.PHONY: golangci-lint
-golangci-lint:
-	if $(TOOLS_BINDIR)/golangci-lint version 2>&1 | grep -vq $(GOLANGCI_LINT_VERSION); then\
-		GOBIN=$(TOOLS_BINDIR) go install -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION); \
-	fi
-
-
 .PHONY: lint
-lint: golangci-lint
+lint: $(TOOLS_BINDIR)/golangci-lint
 	${TOOLS_BINDIR}/golangci-lint run
 
 .PHONY: vendorcheck
@@ -77,11 +67,8 @@ spec: crc-driver-libvirt.spec
 test-rpmbuild: spec
 	${CONTAINER_RUNTIME} build -f Containerfile.rpmbuild .
 
-$(gopath)/bin/gomod2rpmdeps:
-	(cd /tmp && GO111MODULE=on go get github.com/cfergeau/gomod2rpmdeps/cmd/gomod2rpmdeps)
-
-%.spec: %.spec.in $(gopath)/bin/gomod2rpmdeps
-	@$(gopath)/bin/gomod2rpmdeps | sed -e '/__BUNDLED_REQUIRES__/r /dev/stdin' \
+%.spec: %.spec.in $(TOOLS_BINDIR)/gomod2rpmdeps
+	@"$(TOOLS_BINDIR)"/gomod2rpmdeps | sed -e '/__BUNDLED_REQUIRES__/r /dev/stdin' \
 					   -e '/__BUNDLED_REQUIRES__/d' \
 					   -e 's/__VERSION__/'$(VERSION)'/g' \
 				       $< >$@
