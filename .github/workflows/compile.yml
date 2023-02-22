@@ -1,0 +1,29 @@
+name: Build
+on:
+  push:
+    branches:
+      - "master"
+    tags:
+      - "*"
+  pull_request: {}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+      - name: Build
+        run: make CONTAINER_RUNTIME="docker"
+      - name: Build RPM
+        run: make CONTAINER_RUNTIME="docker" test-rpmbuild
+      - name: Upload crc-driver-libvirt artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: crc libvirt machine driver
+          path: crc-driver-libvirt-centos8
