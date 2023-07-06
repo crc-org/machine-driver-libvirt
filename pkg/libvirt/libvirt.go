@@ -544,8 +544,7 @@ func NewDriver(hostName, storePath string) drivers.Driver {
 					StorePath:   storePath,
 				},
 			},
-			Network:     DefaultNetwork,
-			StoragePool: DefaultPool,
+			Network: DefaultNetwork,
 		},
 	}
 }
