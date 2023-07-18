@@ -12,19 +12,19 @@ github.com/crc-org/machine/libmachine/version
 github.com/davecgh/go-spew/spew
 # github.com/kr/text v0.2.0
 ## explicit
-# github.com/libvirt/libvirt-go v4.5.0+incompatible
+# github.com/libvirt/libvirt-go v6.0.0+incompatible
 ## explicit
 github.com/libvirt/libvirt-go
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.9.0
+# github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.8.0
-## explicit; go 1.13
+# github.com/stretchr/testify v1.8.4
+## explicit; go 1.20
 github.com/stretchr/testify/assert
-# golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
+# golang.org/x/sys v0.10.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -34,6 +34,6 @@ golang.org/x/sys/windows
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# libvirt.org/go/libvirtxml v1.8004.0
+# libvirt.org/go/libvirtxml v1.9004.0
 ## explicit; go 1.11
 libvirt.org/go/libvirtxml
