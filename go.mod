@@ -2,9 +2,9 @@ module github.com/crc-org/machine-driver-libvirt
 
 require (
 	github.com/crc-org/machine v0.0.0-20221028075518-f9b43442196b
-	github.com/libvirt/libvirt-go v6.0.0+incompatible
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
+	libvirt.org/go/libvirt v1.8000.0
 	libvirt.org/go/libvirtxml v1.9004.0
 )
 

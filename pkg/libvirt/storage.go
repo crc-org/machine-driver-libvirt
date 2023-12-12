@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/libvirt/libvirt-go"
 	log "github.com/sirupsen/logrus"
+	"libvirt.org/go/libvirt"
 	"libvirt.org/go/libvirtxml"
 )
 

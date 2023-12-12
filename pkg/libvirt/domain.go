@@ -3,7 +3,7 @@ package libvirt
 import (
 	"fmt"
 
-	"github.com/libvirt/libvirt-go"
+	"libvirt.org/go/libvirt"
 	"libvirt.org/go/libvirtxml"
 
 	"github.com/crc-org/machine/libmachine/drivers"
