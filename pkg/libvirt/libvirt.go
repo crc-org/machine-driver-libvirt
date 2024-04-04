@@ -311,6 +311,13 @@ func (d *Driver) Create() error {
 		return err
 	}
 
+	if d.SecondaryDiskSize > 0 {
+		err := d.createSecondaryDisk()
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Debugf("Defining VM...")
 	conn, err := d.getConn()
 	if err != nil {
