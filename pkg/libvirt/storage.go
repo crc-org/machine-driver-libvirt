@@ -125,6 +125,20 @@ func (d *Driver) getVolume() (*libvirt.StorageVol, error) {
 	return vol, nil
 }
 
+func (d *Driver) createSecondaryDisk() error {
+	pool, err := d.getPool()
+	if err != nil {
+		return err
+	}
+	defer pool.Free() // nolint:errcheck
+	volXML, err := volumeXML(fmt.Sprintf("secondary-%s", d.getDiskImageFilename()), d.SecondaryDiskSize)
+	if err != nil {
+		return err
+	}
+	_, err = pool.StorageVolCreateXML(volXML, libvirt.STORAGE_VOL_CREATE_PREALLOC_METADATA)
+	return err
+}
+
 func (d *Driver) getVolCapacity() (uint64, error) {
 	vol, err := d.getVolume()
 	if err != nil {

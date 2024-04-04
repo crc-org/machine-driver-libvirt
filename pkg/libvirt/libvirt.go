@@ -220,8 +220,16 @@ func (d *Driver) getDiskImageFilename() string {
 	return fmt.Sprintf("%s.%s", d.MachineName, d.ImageFormat)
 }
 
+func (d *Driver) getSecondaryDiskImageFilename() string {
+	return fmt.Sprintf("secondary-%s.%s", d.MachineName, d.ImageFormat)
+}
+
 func (d *Driver) getDiskImagePath() string {
 	return d.ResolveStorePath(fmt.Sprintf("%s.%s", d.MachineName, d.ImageFormat))
+}
+
+func (d *Driver) getSecondaryDiskImagePath() string {
+	return d.ResolveStorePath(d.getSecondaryDiskImageFilename())
 }
 
 func (d *Driver) setupDiskImage() error {
