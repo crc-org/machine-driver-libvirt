@@ -155,6 +155,26 @@ func domainXML(d *Driver, machineType string) (string, error) {
 			},
 		}
 	}
+
+	if d.SecondaryDiskSize > 0 {
+		secondaryDisk := libvirtxml.DomainDisk{
+			Device: "disk",
+			Driver: &libvirtxml.DomainDiskDriver{
+				Name: "qemu",
+				Type: "qcow2",
+			},
+			Source: &libvirtxml.DomainDiskSource{
+				File: &libvirtxml.DomainDiskSourceFile{
+					File: d.getSecondaryDiskImagePath(),
+				},
+			},
+			Target: &libvirtxml.DomainDiskTarget{
+				Dev: "vdb",
+				Bus: "virtio",
+			},
+		}
+		domain.Devices.Disks = append(domain.Devices.Disks, secondaryDisk)
+	}
 	return domain.Marshal()
 }
 
