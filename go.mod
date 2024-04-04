@@ -18,3 +18,5 @@ require (
 )
 
 go 1.19
+
+replace github.com/crc-org/machine => github.com/anjannath/machine v0.7.1-0.20240404114742-95ae54a81b44

@@ -16,12 +16,13 @@ type BaseDriver struct {
 
 type VMDriver struct {
 	*BaseDriver
-	ImageSourcePath string
-	ImageFormat     string
-	Memory          int
-	CPU             int
-	DiskCapacity    uint64 // bytes
-	SharedDirs      []SharedDir
+	ImageSourcePath   string
+	ImageFormat       string
+	Memory            int
+	CPU               int
+	DiskCapacity      uint64 // bytes
+	SharedDirs        []SharedDir
+	SecondaryDiskSize uint64
 }
 
 type SharedDir struct {
