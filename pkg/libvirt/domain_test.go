@@ -32,7 +32,7 @@ func TestTemplating(t *testing.T) {
   <name>domain</name>
   <memory unit="MiB">4096</memory>
   <vcpu>4</vcpu>
-  <os>
+  <os firmware="efi">
     <type machine="q35">hvm</type>
     <boot dev="hd"></boot>
     <bootmenu enable="no"></bootmenu>
@@ -85,7 +85,7 @@ func TestVSockTemplating(t *testing.T) {
 	}, "")
 	assert.NoError(t, err)
 	assert.Regexp(t, `(?s)<devices>(.*?)<vsock model="virtio">\s*<cid auto="yes">\s*</cid>\s*</vsock>(.*?)</devices>`, xml)
-	assert.Regexp(t, `(?s)<os>(.*?)<type>hvm</type>(.*?)</os>`, xml)
+	assert.Regexp(t, `(?s)<os firmware="efi">(.*?)<type>hvm</type>(.*?)</os>`, xml)
 }
 
 func TestNetworkTemplating(t *testing.T) {
