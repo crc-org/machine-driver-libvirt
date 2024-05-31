@@ -31,6 +31,7 @@ func domainXML(d *Driver, machineType string) (string, error) {
 			Mode: "host-passthrough",
 		},
 		OS: &libvirtxml.DomainOS{
+			Firmware: "efi",
 			Type: &libvirtxml.DomainOSType{
 				Type: "hvm",
 			},
