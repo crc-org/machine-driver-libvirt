@@ -448,7 +448,7 @@ func (d *Driver) Remove() error {
 	//       could take a snapshot.  If you do, then Undefine
 	//       will fail unless we nuke the snapshots first
 	_ = d.vm.Destroy() // Ignore errors
-	return d.vm.Undefine()
+	return d.vm.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM)
 }
 
 func (d *Driver) Restart() error {
