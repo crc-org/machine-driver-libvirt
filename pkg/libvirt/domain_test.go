@@ -42,9 +42,7 @@ func TestTemplating(t *testing.T) {
     <acpi></acpi>
     <apic></apic>
   </features>
-  <cpu mode="host-passthrough">
-    <feature policy="disable" name="rdrand"></feature>
-  </cpu>
+  <cpu mode="host-passthrough"></cpu>
   <clock offset="utc"></clock>
   <devices>
     <disk type="file" device="disk">
