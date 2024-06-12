@@ -3,7 +3,7 @@ DESCRIBE=$(shell git describe --tags)
 VERSION=$(shell grep DriverVersion pkg/libvirt/constants.go | awk '{ print $$3 }' | tr -d \")
 CONTAINER_RUNTIME ?= podman
 
-TARGETS=$(addprefix $(CMD)-, centos8)
+TARGETS=$(addprefix $(CMD)-, almalinux8)
 
 build: $(TARGETS)
 
