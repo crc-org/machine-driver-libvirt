@@ -32,6 +32,14 @@ func domainXML(d *Driver, machineType string) (string, error) {
 		},
 		OS: &libvirtxml.DomainOS{
 			Firmware: "efi",
+			FirmwareInfo: &libvirtxml.DomainOSFirmwareInfo{
+				Features: []libvirtxml.DomainOSFirmwareFeature{
+					{
+						Name:    "secure-boot",
+						Enabled: "no",
+					},
+				},
+			},
 			Type: &libvirtxml.DomainOSType{
 				Type: "hvm",
 			},
