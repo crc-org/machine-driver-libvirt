@@ -34,6 +34,9 @@ func TestTemplating(t *testing.T) {
   <vcpu>4</vcpu>
   <os firmware="efi">
     <type machine="q35">hvm</type>
+    <firmware>
+      <feature enabled="no" name="secure-boot"></feature>
+    </firmware>
     <boot dev="hd"></boot>
     <bootmenu enable="no"></bootmenu>
   </os>
