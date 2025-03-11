@@ -1,8 +1,8 @@
-FROM quay.io/almalinuxorg/8-minimal:8
+FROM quay.io/centos/centos:stream9
 
 MAINTAINER CRC team
 
-RUN microdnf install -y libvirt-devel curl git gcc make golang diffutils
+RUN dnf --enablerepo=crb install -y libvirt-devel git gcc make golang diffutils
 
 COPY . /go/src/github.com/crc-org/machine-driver-libvirt
 WORKDIR /go/src/github.com/crc-org/machine-driver-libvirt
