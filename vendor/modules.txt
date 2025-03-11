@@ -1,4 +1,4 @@
-# github.com/crc-org/machine v0.0.0-20221028075518-f9b43442196b
+# github.com/crc-org/machine v0.0.0-20240926103419-a943b47fd48b
 ## explicit; go 1.17
 github.com/crc-org/machine/drivers/libvirt
 github.com/crc-org/machine/libmachine/drivers
@@ -18,11 +18,11 @@ github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.8.4
-## explicit; go 1.20
+# github.com/stretchr/testify v1.9.0
+## explicit; go 1.17
 github.com/stretchr/testify/assert
-# golang.org/x/sys v0.15.0
-## explicit; go 1.18
+# golang.org/x/sys v0.31.0
+## explicit; go 1.23.0
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
