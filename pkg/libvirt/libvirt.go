@@ -49,11 +49,11 @@ func (d *Driver) DriverVersion() string {
 	return DriverVersion
 }
 
-func convertMiBToKiB(sizeMb int) uint64 {
+func convertMiBToKiB(sizeMb uint) uint64 {
 	return uint64(sizeMb) * 1024
 }
 
-func (d *Driver) setMemory(memorySize int) error {
+func (d *Driver) setMemory(memorySize uint) error {
 	log.Debugf("Setting memory to %d MiB", memorySize)
 	if err := d.validateVMRef(); err != nil {
 		return err
@@ -88,7 +88,7 @@ func (d *Driver) setVcpus(cpus uint) error {
 		return err
 	}
 
-	d.CPU = int(cpus)
+	d.CPU = cpus
 
 	return nil
 }
