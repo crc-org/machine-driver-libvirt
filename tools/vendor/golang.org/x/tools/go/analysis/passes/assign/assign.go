@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package assign defines an Analyzer that detects useless assignments.
 package assign
 
 // TODO(adonovan): check also for assignments to struct fields inside
 // methods that are on T instead of *T.
 
 import (
+	_ "embed"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -19,22 +19,21 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/analysis/passes/internal/analysisutil"
 	"golang.org/x/tools/go/ast/inspector"
+	"golang.org/x/tools/internal/analysisinternal"
 )
 
-const Doc = `check for useless assignments
-
-This checker reports assignments of the form x = x or a[i] = a[i].
-These are almost always useless, and even when they aren't they are
-usually a mistake.`
+//go:embed doc.go
+var doc string
 
 var Analyzer = &analysis.Analyzer{
 	Name:     "assign",
-	Doc:      Doc,
+	Doc:      analysisutil.MustExtractDoc(doc, "assign"),
+	URL:      "https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/assign",
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 	Run:      run,
 }
 
-func run(pass *analysis.Pass) (interface{}, error) {
+func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 	nodeFilter := []ast.Node{
@@ -59,15 +58,17 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			if reflect.TypeOf(lhs) != reflect.TypeOf(rhs) {
 				continue // short-circuit the heavy-weight gofmt check
 			}
-			le := analysisutil.Format(pass.Fset, lhs)
-			re := analysisutil.Format(pass.Fset, rhs)
+			le := analysisinternal.Format(pass.Fset, lhs)
+			re := analysisinternal.Format(pass.Fset, rhs)
 			if le == re {
 				pass.Report(analysis.Diagnostic{
 					Pos: stmt.Pos(), Message: fmt.Sprintf("self-assignment of %s to %s", re, le),
-					SuggestedFixes: []analysis.SuggestedFix{
-						{Message: "Remove", TextEdits: []analysis.TextEdit{
-							{Pos: stmt.Pos(), End: stmt.End(), NewText: []byte{}},
-						}},
+					SuggestedFixes: []analysis.SuggestedFix{{
+						Message: "Remove self-assignment",
+						TextEdits: []analysis.TextEdit{{
+							Pos: stmt.Pos(),
+							End: stmt.End(),
+						}}},
 					},
 				})
 			}
@@ -79,7 +80,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 // isMapIndex returns true if e is a map index expression.
 func isMapIndex(info *types.Info, e ast.Expr) bool {
-	if idx, ok := analysisutil.Unparen(e).(*ast.IndexExpr); ok {
+	if idx, ok := ast.Unparen(e).(*ast.IndexExpr); ok {
 		if typ := info.Types[idx.X].Type; typ != nil {
 			_, ok := typ.Underlying().(*types.Map)
 			return ok
