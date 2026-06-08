@@ -26,6 +26,26 @@ type Driver struct {
 	vmLoaded bool
 }
 
+func operationLogFields(operation string, machineName string, err error) log.Fields {
+	switch err {
+	case nil:
+		return log.Fields{
+			"operation": operation,
+			"machine":   machineName,
+		}
+	default:
+		return log.Fields{
+			"operation": operation,
+			"machine":   machineName,
+			"error":     err.Error(),
+		}
+	}
+}
+
+func operationLog(operation string, machineName string, err error) *log.Entry {
+	return log.WithFields(operationLogFields(operation, machineName, err))
+}
+
 func (d *Driver) GetMachineName() string {
 	return d.MachineName
 }
@@ -440,15 +460,28 @@ func (d *Driver) Stop() error {
 
 func (d *Driver) Remove() error {
 	log.Debugf("Removing VM %s", d.MachineName)
-	_ = d.validateVMRef()
+	err := d.validateVMRef()
+	if err != nil {
+		operationLog("Remove", d.MachineName, err).Error("destructive operation failed")
+	}
 	if !d.vmLoaded {
+		operationLog("Remove", d.MachineName, nil).Info("destructive operation succeeded")
 		return nil
 	}
 	// Note: If we switch to qcow disks instead of raw the user
 	//       could take a snapshot.  If you do, then Undefine
 	//       will fail unless we nuke the snapshots first
-	_ = d.vm.Destroy() // Ignore errors
-	return d.vm.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM)
+	err = d.vm.Destroy() // Ignore errors
+	if err != nil {
+		operationLog("Remove", d.MachineName, err).Error("destructive operation failed")
+	}
+	err = d.vm.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM)
+	if err != nil {
+		operationLog("Remove", d.MachineName, err).Error("destructive operation failed")
+		return err
+	}
+	operationLog("Remove", d.MachineName, nil).Info("destructive operation succeeded")
+	return nil
 }
 
 func (d *Driver) Restart() error {
@@ -462,9 +495,16 @@ func (d *Driver) Restart() error {
 func (d *Driver) Kill() error {
 	log.Debugf("Killing VM %s", d.MachineName)
 	if err := d.validateVMRef(); err != nil {
+		operationLog("Kill", d.MachineName, err).Error("destructive operation failed")
 		return err
 	}
-	return d.vm.Destroy()
+	err := d.vm.Destroy()
+	if err != nil {
+		operationLog("Kill", d.MachineName, err).Error("destructive operation failed")
+		return err
+	}
+	operationLog("Kill", d.MachineName, nil).Info("destructive operation succeeded")
+	return nil
 }
 
 func (d *Driver) GetState() (state.State, error) {
